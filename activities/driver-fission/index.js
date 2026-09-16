@@ -286,18 +286,8 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     };
   }
 
-  function configuredRewardTypes(activityCode) {
-    const activity = repository.find(activityCode);
-    if (!activity) return [];
-    if (activity.taskType === "first_order" || activity.taskType === "combined") return activity.taskType === "combined" ? ["ordinary", "cash"] : ["cash"];
-    if (activity.certificationRewardType === "both") return ["ordinary", "cash"];
-    return [activity.certificationRewardType === "cash" ? "cash" : "ordinary"];
-  }
-
-  function rewardCountLines(record, field) {
-    const labels = { ordinary: "普通奖励", cash: "现金奖励" };
-    const rewardTypes = configuredRewardTypes(record.activityCode);
-    return rewardTypes.map(type => `<div class="reward-count-line"><span>${labels[type]}：</span><b>${record[field][type] || 0}</b></div>`).join("");
+  function cashRewardCountLine(record, field) {
+    return `<div class="reward-count-line"><span>现金奖励：</span><b>${record[field].cash || 0}</b></div>`;
   }
 
   function drawParticipationRows(records) {
@@ -306,7 +296,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     document.querySelector("#participationPaginationCount").textContent = `共 ${records.length} 条`;
     host.innerHTML = records.length ? records.map((record, index) => `<tr>
       <td>${index + 1}</td><td>${record.activityCode}</td><td>${record.hostMid}</td><td class="ellipsis-cell" title="${record.shareId}">${record.shareId}</td>
-      <td>${TASK_LABELS[record.taskType]}</td><td>${record.joinedAt}</td><td>${rewardCountLines(record, "claimable")}</td><td>${rewardCountLines(record, "claimed")}</td>
+      <td>${TASK_LABELS[record.taskType]}</td><td>${record.joinedAt}</td><td>${cashRewardCountLine(record, "claimable")}</td><td>${cashRewardCountLine(record, "claimed")}</td>
       <td>${record.passengerClaimable}</td><td>${record.passengerClaimed}</td>
       <td><button class="btn btn-text" data-participation-detail="${record.shareId}">查看明细</button></td>
     </tr>`).join("") : `<tr><td colspan="11" class="empty">暂无数据</td></tr>`;
