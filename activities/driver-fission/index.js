@@ -10,6 +10,7 @@ const TASK_LABELS = {
 };
 
 const FISSION_TYPE_LABELS = { driver: "司机裂变", passenger: "乘客裂变" };
+const PASSENGER_REWARD_TYPE_LABELS = { cash: "现金奖励" };
 
 const SELECT_OPTIONS = {
   certification: [
@@ -304,6 +305,13 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     return rewardTypes.map(type => `<div class="reward-count-line"><span>${labels[type]}：</span><b>${record[field][type] || 0}</b></div>`).join("");
   }
 
+  function passengerRewardCountLine(record, field) {
+    const activity = repository.find(record.activityCode);
+    const rewardType = activity?.passengerMasterRewardType;
+    const rewardLabel = PASSENGER_REWARD_TYPE_LABELS[rewardType] || "未配置奖励";
+    return `<div class="reward-count-line"><span>${rewardLabel}：</span><b>${record[field] || 0}</b></div>`;
+  }
+
   function drawParticipationRows(records) {
     const host = document.querySelector("#participationRows");
     document.querySelector("#participationCount").textContent = `共 ${records.length} 条`;
@@ -311,7 +319,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     host.innerHTML = records.length ? records.map((record, index) => `<tr>
       <td>${index + 1}</td><td>${record.activityCode}</td><td>${record.hostMid}</td><td class="ellipsis-cell" title="${record.shareId}">${record.shareId}</td>
       <td>${TASK_LABELS[record.taskType]}</td><td>${record.joinedAt}</td><td>${rewardCountLines(record, "claimable")}</td><td>${rewardCountLines(record, "claimed")}</td>
-      <td>${record.passengerClaimable}</td><td>${record.passengerClaimed}</td>
+      <td>${passengerRewardCountLine(record, "passengerClaimable")}</td><td>${passengerRewardCountLine(record, "passengerClaimed")}</td>
       <td><button class="btn btn-text" data-participation-detail="${record.shareId}">查看明细</button></td>
     </tr>`).join("") : `<tr><td colspan="11" class="empty">暂无数据</td></tr>`;
     host.querySelectorAll("[data-participation-detail]").forEach(button => {
