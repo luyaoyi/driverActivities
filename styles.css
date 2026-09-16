@@ -83,6 +83,8 @@ tbody tr:hover { background: #f5faff; }
 .card-header { height: 50px; padding: 0 18px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border-light); font-weight: 600; }
 .card-body { padding: 22px 26px 24px; }
 .edit-grid { display: grid; grid-template-columns: 1fr 1fr; column-gap: 34px; row-gap: 20px; max-width: 1080px; }
+.edit-grid.single-column { grid-template-columns: minmax(0, 900px); max-width: 1080px; }
+.edit-grid.single-column .edit-item.full { grid-column: 1; }
 .edit-item { display: grid; grid-template-columns: 170px 1fr; align-items: start; min-width: 0; }
 .edit-item.full { grid-column: 1 / -1; }
 .edit-label { min-height: 32px; display: flex; align-items: center; justify-content: flex-end; padding-right: 14px; color: var(--regular); text-align: right; }
@@ -110,6 +112,13 @@ tbody tr:hover { background: #f5faff; }
 .reward-subgrid { grid-column: 1 / -1; display: grid; grid-template-columns: 1fr 1fr; gap: 16px 28px; padding: 14px; background: #fafbfc; border: 1px dashed #d9dde4; border-radius: 4px; }
 .reward-group-title { grid-column: 1 / -1; color: var(--regular); font-weight: 600; }
 .inline-control { display: flex; align-items: center; gap: 8px; }
+.inline-control > input { width: 100%; max-width: 330px; }
+.number-control { display: flex; align-items: center; width: min(100%, 600px); }
+.number-control button { width: 34px; height: 32px; border: 1px solid var(--border); color: var(--regular); background: #f5f7fa; }
+.number-control button:first-child { border-radius: 4px 0 0 4px; }
+.number-control button:nth-of-type(2) { border-radius: 0 4px 4px 0; }
+.number-control input { min-width: 100px; flex: 1; border-radius: 0; border-inline: 0; text-align: center; }
+.number-control span { margin-left: 10px; white-space: nowrap; }
 .multiline-input { width: 100%; max-width: 800px; min-height: 86px; }
 .multiline-input.tall { min-height: 140px; }
 .image-upload-control { display: flex; align-items: flex-end; gap: 8px; }
