@@ -17,6 +17,10 @@ const SELECT_OPTIONS = {
     ["ORDER-FIRST-001", "司机首单完单任务"],
     ["ORDER-FIRST-CITY", "城市首单专项任务"],
   ],
+  passengerOrder: [
+    ["PASSENGER-ORDER-001", "乘客用车完单任务"],
+    ["PASSENGER-MILEAGE-001", "乘客用车里程任务"],
+  ],
   ordinaryReward: [
     ["CLAIM-BONUS-10", "奖励金卡10元"],
     ["CLAIM-MEMBER-30D", "会员卡30天"],
@@ -29,6 +33,14 @@ const SELECT_OPTIONS = {
     ["GUEST-CERT-10", "客态认证奖励"],
     ["GUEST-ORDER-20", "客态首单奖励"],
     ["GUEST-COMMON-10", "客态通用奖励"],
+  ],
+  passengerVoucher: [
+    ["PASSENGER-VOUCHER-10", "乘客用车代金券10元"],
+    ["PASSENGER-VOUCHER-20", "乘客用车代金券20元"],
+  ],
+  passengerCashReward: [
+    ["CASH-PASSENGER-10", "邀请乘客完单返现10元"],
+    ["CASH-PASSENGER-20", "邀请乘客完单返现20元"],
   ],
 };
 
@@ -65,6 +77,18 @@ function defaultConfig() {
     orderClaimDelay: 1,
     orderClaimLimit: 1,
     guestReward: "",
+    passengerFissionEnabled: "off",
+    passengerEligibility: "new_only",
+    passengerOrderTaskId: "",
+    passengerVoucherReward: "",
+    passengerMasterRewardType: "cash",
+    passengerCashReward: "",
+    passengerCashAmount: 1,
+    passengerClaimDelay: 0,
+    passengerClaimLimit: 1,
+    passengerShareTitle: "",
+    passengerShareSubtitle: "",
+    passengerShareImage: "",
     memberBenefitEnabled: "off",
     memberBenefitStart: "reward",
     memberBenefitCode: "",
@@ -99,6 +123,18 @@ function seedRecord(overrides = {}) {
     orderCashReward: "CASH-FIRST-ORDER-50",
     orderCashAmount: 50,
     guestReward: "GUEST-COMMON-10",
+    passengerFissionEnabled: "on",
+    passengerEligibility: "all",
+    passengerOrderTaskId: "PASSENGER-MILEAGE-001",
+    passengerVoucherReward: "PASSENGER-VOUCHER-10",
+    passengerMasterRewardType: "cash",
+    passengerCashReward: "CASH-PASSENGER-10",
+    passengerCashAmount: 10,
+    passengerClaimDelay: 0,
+    passengerClaimLimit: 5,
+    passengerShareTitle: "邀请你组队打车领券",
+    passengerShareSubtitle: "完成指定里程订单，我也能领现金",
+    passengerShareImage: "https://example.com/fission-passenger-share.png",
     memberBenefitEnabled: "on",
     memberBenefitCode: "MEMBER-30D-DRIVER",
     hostPageTitle: "邀请车主完成任务，一起领好礼",
@@ -123,16 +159,44 @@ function seedRecord(overrides = {}) {
   };
 }
 
+function seedParticipationRecords() {
+  return [
+    { activityCode: "FISSION-202606-002", hostMid: "1728696355", shareId: "3a00a5663f9c", taskType: "first_order", joinedAt: "2026-09-16 16:33:25", claimable: { ordinary: 0, cash: 30 }, claimed: { ordinary: 0, cash: 0 } },
+    { activityCode: "FISSION-202606-002", hostMid: "2062421952", shareId: "c7cec6971a42", taskType: "first_order", joinedAt: "2026-09-16 16:32:15", claimable: { ordinary: 0, cash: 30 }, claimed: { ordinary: 0, cash: 0 } },
+    { activityCode: "FISSION-202606-002", hostMid: "3365504441", shareId: "e57777642c81", taskType: "first_order", joinedAt: "2026-09-16 16:31:18", claimable: { ordinary: 0, cash: 30 }, claimed: { ordinary: 0, cash: 0 } },
+    { activityCode: "FISSION-202609-001", hostMid: "3567297664", shareId: "0f705f1c601b", taskType: "combined", joinedAt: "2026-06-27 09:49:24", claimable: { ordinary: 30, cash: 30 }, claimed: { ordinary: 0, cash: 0 } },
+    { activityCode: "FISSION-202609-001", hostMid: "1434376038", shareId: "6d8ea106be32", taskType: "combined", joinedAt: "2026-06-22 20:26:09", claimable: { ordinary: 30, cash: 30 }, claimed: { ordinary: 3, cash: 1 } },
+    { activityCode: "FISSION-202601-006", hostMid: "3555708953", shareId: "9a1ab127bb94", taskType: "certification", joinedAt: "2026-06-16 16:09:23", claimable: { ordinary: 12, cash: 0 }, claimed: { ordinary: 5, cash: 0 } },
+  ];
+}
+
+function seedTaskRecords() {
+  return [
+    { id: "TASK-27771", shareId: "3a00a5663f9c", guestMid: "3603557583", deviceNo: "DEVICE-A102", taskNo: "TST0Z6TT001", taskType: "first_order", subTaskType: "首单完单", taskStatus: "进行中", startedAt: "2026-09-16 16:16:41", expiresAt: "2026-09-23 16:16:40", completedAt: "-", rewardType: "cash", rewardStatus: "初始化", paymentStatus: "未打款", guestRewardStatus: "领取成功" },
+    { id: "TASK-27772", shareId: "3a00a5663f9c", guestMid: "1592063031", deviceNo: "DEVICE-B208", taskNo: "TSRH6Y4E002", taskType: "first_order", subTaskType: "首单完单", taskStatus: "已完成", startedAt: "2026-09-16 16:25:59", expiresAt: "2026-09-23 16:25:59", completedAt: "2026-09-18 10:22:16", rewardType: "cash", rewardStatus: "领取失败", paymentStatus: "打款失败", guestRewardStatus: "领取成功" },
+    { id: "TASK-27773", shareId: "0f705f1c601b", guestMid: "1883201145", deviceNo: "DEVICE-C319", taskNo: "CERT2026003", taskType: "combined", subTaskType: "认证任务", taskStatus: "已完成", startedAt: "2026-06-27 10:01:12", expiresAt: "2026-07-04 10:01:12", completedAt: "2026-06-27 11:15:32", rewardType: "ordinary", rewardStatus: "领取成功", paymentStatus: "-", guestRewardStatus: "领取成功" },
+    { id: "TASK-27774", shareId: "0f705f1c601b", guestMid: "1883201145", deviceNo: "DEVICE-C319", taskNo: "ORDER2026004", taskType: "combined", subTaskType: "首单任务", taskStatus: "已完成", startedAt: "2026-06-27 11:16:00", expiresAt: "2026-07-04 11:16:00", completedAt: "2026-06-28 09:08:27", rewardType: "cash", rewardStatus: "初始化", paymentStatus: "未打款", guestRewardStatus: "领取成功" },
+    { id: "TASK-27775", shareId: "6d8ea106be32", guestMid: "2095517632", deviceNo: "DEVICE-D427", taskNo: "ORDER2026005", taskType: "combined", subTaskType: "首单任务", taskStatus: "已完成", startedAt: "2026-06-22 20:35:18", expiresAt: "2026-06-29 20:35:18", completedAt: "2026-06-24 08:42:11", rewardType: "cash", rewardStatus: "领取成功", paymentStatus: "打款成功", guestRewardStatus: "领取成功" },
+    { id: "TASK-27776", shareId: "9a1ab127bb94", guestMid: "2261095804", deviceNo: "DEVICE-E531", taskNo: "CERT2026006", taskType: "certification", subTaskType: "认证任务", taskStatus: "已完成", startedAt: "2026-06-16 16:20:15", expiresAt: "2026-06-23 16:20:15", completedAt: "2026-06-18 14:30:41", rewardType: "ordinary", rewardStatus: "领取成功", paymentStatus: "-", guestRewardStatus: "领取成功" },
+  ];
+}
+
 export function createDriverFissionActivity({ main, modalRoot, navigate }) {
   const repository = createMockActivityRepository([
     seedRecord(),
-    seedRecord({ code: "FISSION-202606-002", name: "邀请车主认证-首单现金30", taskType: "first_order", status: 1, created: "2026-06-12 16:13:06", modified: "2026-06-12 16:13:06" }),
-    seedRecord({ code: "FISSION-202605-003", name: "邀请车主认证-认证现金", taskType: "certification", certificationRewardType: "cash", status: 0, created: "2026-05-25 17:11:32", modified: "2026-05-25 17:11:32" }),
-    seedRecord({ code: "FISSION-202605-004", name: "邀请车主认证-首单现金", taskType: "first_order", status: 0, created: "2026-05-11 18:46:24", modified: "2026-05-11 18:46:24" }),
-    seedRecord({ code: "FISSION-202604-005", name: "邀请车主认证-双重", taskType: "combined", status: 0, created: "2026-04-15 11:31:13", modified: "2026-04-15 11:31:13" }),
-    seedRecord({ code: "FISSION-202601-006", name: "邀请车主认证", taskType: "certification", status: 0, created: "2026-01-16 13:16:37", modified: "2026-01-16 13:16:37" }),
+    seedRecord({ code: "FISSION-202606-002", name: "邀请车主认证-首单现金30", taskType: "first_order", passengerFissionEnabled: "off", status: 1, created: "2026-06-12 16:13:06", modified: "2026-06-12 16:13:06" }),
+    seedRecord({ code: "FISSION-202605-003", name: "邀请车主认证-认证现金", taskType: "certification", certificationRewardType: "cash", passengerFissionEnabled: "off", status: 0, created: "2026-05-25 17:11:32", modified: "2026-05-25 17:11:32" }),
+    seedRecord({ code: "FISSION-202605-004", name: "邀请车主认证-首单现金", taskType: "first_order", passengerFissionEnabled: "off", status: 0, created: "2026-05-11 18:46:24", modified: "2026-05-11 18:46:24" }),
+    seedRecord({ code: "FISSION-202604-005", name: "邀请车主认证-双重", taskType: "combined", passengerFissionEnabled: "off", status: 0, created: "2026-04-15 11:31:13", modified: "2026-04-15 11:31:13" }),
+    seedRecord({ code: "FISSION-202601-006", name: "邀请车主认证", taskType: "certification", passengerFissionEnabled: "off", status: 0, created: "2026-01-16 13:16:37", modified: "2026-01-16 13:16:37" }),
   ]);
-  const state = { draft: null, readonly: false };
+  const state = {
+    draft: null,
+    readonly: false,
+    participations: seedParticipationRecords(),
+    tasks: seedTaskRecords(),
+    selectedShareId: "",
+  };
 
   function go(page) {
     navigate(`${ACTIVITY_ID}/${page}`);
@@ -142,6 +206,8 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     modalRoot.innerHTML = "";
     if (page === "list") renderList();
     if (page === "edit") renderEdit();
+    if (page === "data") renderData();
+    if (page === "data-detail") renderDataDetail();
   }
 
   function renderList() {
@@ -162,7 +228,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       </section>
       <section>
         <div class="table-titlebar"><span class="table-title">真车主裂变活动配置</span><span id="fissionCount" style="color:#909399;font-size:12px">共 ${records.length} 条</span></div>
-        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>活动名称</th><th>任务类型</th><th>状态</th><th>创建人</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="fissionRows"></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>活动名称</th><th>司机任务类型</th><th>乘客裂变</th><th>状态</th><th>创建人</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="fissionRows"></tbody></table></div>
         <div class="pagination"><span>共 ${records.length} 条</span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
       </section>`;
     drawRows(records);
@@ -179,10 +245,11 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     document.querySelector("#fissionCount").textContent = `共 ${records.length} 条`;
     host.innerHTML = records.length ? records.map((record, index) => `<tr>
       <td>${index + 1}</td><td>${record.code}</td><td>${record.name}</td><td>${TASK_LABELS[record.taskType]}</td>
+      <td><span class="tag ${record.passengerFissionEnabled === "on" ? "tag-success" : "tag-info"}">${record.passengerFissionEnabled === "on" ? "已开启" : "未开启"}</span></td>
       <td><span class="tag ${record.status ? "tag-success" : "tag-info"}">${record.status ? "有效" : "无效"}</span></td>
       <td>${record.creator}</td><td>${record.created}</td>
       <td><button class="btn btn-text" data-fission-view="${record.code}">查看</button><button class="btn btn-text" data-fission-edit="${record.code}">编辑</button><button class="btn btn-text" data-fission-log="${record.code}">日志</button></td>
-    </tr>`).join("") : `<tr><td colspan="8" class="empty">暂无数据</td></tr>`;
+    </tr>`).join("") : `<tr><td colspan="9" class="empty">暂无数据</td></tr>`;
     host.querySelectorAll("[data-fission-view]").forEach(button => { button.onclick = () => openEdit(button.dataset.fissionView, true); });
     host.querySelectorAll("[data-fission-edit]").forEach(button => { button.onclick = () => openEdit(button.dataset.fissionEdit, false); });
     host.querySelectorAll("[data-fission-log]").forEach(button => { button.onclick = () => showLogs(button.dataset.fissionLog); });
@@ -193,6 +260,141 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     const name = document.querySelector("#fissionQName").value.trim().toLowerCase();
     const status = document.querySelector("#fissionQStatus").value;
     drawRows(repository.list().filter(record => (!code || record.code.toLowerCase().includes(code)) && (!name || record.name.toLowerCase().includes(name)) && (status === "" || String(record.status) === status)));
+  }
+
+  function renderData() {
+    main.innerHTML = `
+      <div class="breadcrumb"><a>真车主裂变活动</a><i>›</i><span>活动数据</span></div>
+      <section class="panel">
+        <div class="query-grid">
+          <div class="form-field"><label>活动编号：</label><input id="dataActivityCode" placeholder="请输入"></div>
+          <div class="form-field"><label>主态mid：</label><input id="dataHostMid" placeholder="请输入"></div>
+          <div class="form-field"><label>分享Id：</label><input id="dataShareId" placeholder="请输入"></div>
+        </div>
+        <div class="query-actions"><button class="btn btn-primary" id="dataQuery">⌕ 查询</button><button class="btn btn-primary" id="dataReset">↻ 重置</button></div>
+      </section>
+      <section>
+        <div class="table-titlebar"><span class="table-title">裂变活动参与数据</span><span id="participationCount" style="color:#909399;font-size:12px"></span></div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>主态mid</th><th>分享ID</th><th>任务类型</th><th>活动参与时间</th><th>可领奖总次数</th><th>已领奖总次数</th><th>操作</th></tr></thead><tbody id="participationRows"></tbody></table></div>
+        <div class="pagination"><span id="participationPaginationCount"></span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
+      </section>`;
+    drawParticipationRows(state.participations);
+    document.querySelector("#dataQuery").onclick = filterParticipationRows;
+    document.querySelector("#dataReset").onclick = () => {
+      ["dataActivityCode", "dataHostMid", "dataShareId"].forEach(id => { document.querySelector(`#${id}`).value = ""; });
+      toast("筛选条件已重置，请点击查询");
+    };
+  }
+
+  function configuredRewardTypes(activityCode) {
+    const activity = repository.find(activityCode);
+    if (!activity) return [];
+    if (activity.taskType === "first_order" || activity.taskType === "combined") return activity.taskType === "combined" ? ["ordinary", "cash"] : ["cash"];
+    if (activity.certificationRewardType === "both") return ["ordinary", "cash"];
+    return [activity.certificationRewardType === "cash" ? "cash" : "ordinary"];
+  }
+
+  function rewardCountLines(record, field) {
+    const labels = { ordinary: "普通奖励", cash: "现金奖励" };
+    const rewardTypes = configuredRewardTypes(record.activityCode);
+    return rewardTypes.map(type => `<div class="reward-count-line"><span>${labels[type]}：</span><b>${record[field][type] || 0}</b></div>`).join("");
+  }
+
+  function drawParticipationRows(records) {
+    const host = document.querySelector("#participationRows");
+    document.querySelector("#participationCount").textContent = `共 ${records.length} 条`;
+    document.querySelector("#participationPaginationCount").textContent = `共 ${records.length} 条`;
+    host.innerHTML = records.length ? records.map((record, index) => `<tr>
+      <td>${index + 1}</td><td>${record.activityCode}</td><td>${record.hostMid}</td><td class="ellipsis-cell" title="${record.shareId}">${record.shareId}</td>
+      <td>${TASK_LABELS[record.taskType]}</td><td>${record.joinedAt}</td><td>${rewardCountLines(record, "claimable")}</td><td>${rewardCountLines(record, "claimed")}</td>
+      <td><button class="btn btn-text" data-participation-detail="${record.shareId}">查看明细</button></td>
+    </tr>`).join("") : `<tr><td colspan="9" class="empty">暂无数据</td></tr>`;
+    host.querySelectorAll("[data-participation-detail]").forEach(button => {
+      button.onclick = () => {
+        state.selectedShareId = button.dataset.participationDetail;
+        go("data-detail");
+      };
+    });
+  }
+
+  function filterParticipationRows() {
+    const activityCode = document.querySelector("#dataActivityCode").value.trim().toLowerCase();
+    const hostMid = document.querySelector("#dataHostMid").value.trim();
+    const shareId = document.querySelector("#dataShareId").value.trim().toLowerCase();
+    drawParticipationRows(state.participations.filter(record => (!activityCode || record.activityCode.toLowerCase().includes(activityCode)) && (!hostMid || record.hostMid.includes(hostMid)) && (!shareId || record.shareId.toLowerCase().includes(shareId))));
+  }
+
+  function renderDataDetail() {
+    if (!state.selectedShareId) state.selectedShareId = state.participations[0]?.shareId || "";
+    const selectedParticipation = state.participations.find(record => record.shareId === state.selectedShareId);
+    main.innerHTML = `
+      <div class="breadcrumb"><a id="backToFissionData">真车主裂变活动</a><i>›</i><a id="backToFissionData2">活动数据</a><i>›</i><span>任务明细</span></div>
+      <div class="page-header"><div><h1>裂变任务明细</h1><p>${selectedParticipation ? `主态mid：${selectedParticipation.hostMid}　活动编号：${selectedParticipation.activityCode}` : "查看客态任务及奖励状态"}</p></div></div>
+      <section class="panel">
+        <div class="detail-query-grid">
+          <div class="form-field"><label>分享Id：</label><input id="detailShareId" value="${state.selectedShareId}" placeholder="请输入"></div>
+          <div class="form-field"><label>客态mid：</label><input id="detailGuestMid" placeholder="请输入"></div>
+          <div class="form-field"><label>设备号：</label><input id="detailDeviceNo" placeholder="请输入"></div>
+          <div class="form-field"><label>主态奖励类型：</label><select id="detailRewardType"><option value="">全部</option><option value="ordinary">普通奖励</option><option value="cash">现金奖励</option></select></div>
+          <div class="form-field"><label>子任务类型：</label><select id="detailSubTaskType"><option value="">全部</option><option value="认证任务">认证任务</option><option value="首单任务">首单任务</option><option value="首单完单">首单完单</option></select></div>
+        </div>
+        <div class="query-actions"><button class="btn btn-primary" id="detailQuery">⌕ 查询</button><button class="btn btn-primary" id="detailReset">↻ 重置</button></div>
+      </section>
+      <section>
+        <div class="table-titlebar"><span class="table-title">客态任务明细</span><span id="taskCount" style="color:#909399;font-size:12px"></span></div>
+        <div class="table-wrap"><table class="extra-wide"><thead><tr><th>序号</th><th>分享ID</th><th>客态mid</th><th>设备号</th><th>taskNo</th><th>任务类型</th><th>子任务类型</th><th>任务状态</th><th>任务开始时间</th><th>任务过期时间</th><th>任务完成时间</th><th>主态奖励类型</th><th>主态奖励状态</th><th>打款状态</th><th>客态奖励状态</th><th>操作</th></tr></thead><tbody id="taskRows"></tbody></table></div>
+        <div class="pagination"><span id="taskPaginationCount"></span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
+      </section>`;
+    ["backToFissionData", "backToFissionData2"].forEach(id => { document.querySelector(`#${id}`).onclick = () => go("data"); });
+    drawTaskRows(tasksForSelectedParticipation());
+    document.querySelector("#detailQuery").onclick = filterTaskRows;
+    document.querySelector("#detailReset").onclick = () => {
+      document.querySelector("#detailShareId").value = state.selectedShareId;
+      ["detailGuestMid", "detailDeviceNo", "detailRewardType", "detailSubTaskType"].forEach(id => { document.querySelector(`#${id}`).value = ""; });
+      toast("筛选条件已重置，请点击查询");
+    };
+  }
+
+  function tasksForSelectedParticipation() {
+    return state.tasks.filter(record => record.shareId === state.selectedShareId);
+  }
+
+  function rewardTypeLabel(type) {
+    return type === "cash" ? "现金奖励" : "普通奖励";
+  }
+
+  function drawTaskRows(records) {
+    const host = document.querySelector("#taskRows");
+    document.querySelector("#taskCount").textContent = `共 ${records.length} 条`;
+    document.querySelector("#taskPaginationCount").textContent = `共 ${records.length} 条`;
+    host.innerHTML = records.length ? records.map((record, index) => {
+      const canForceUpdate = record.rewardType === "cash" && ["未打款", "打款失败"].includes(record.paymentStatus);
+      return `<tr>
+        <td>${index + 1}</td><td class="ellipsis-cell" title="${record.shareId}">${record.shareId}</td><td>${record.guestMid}</td><td>${record.deviceNo}</td><td>${record.taskNo}</td>
+        <td>${TASK_LABELS[record.taskType]}</td><td>${record.subTaskType}</td><td>${record.taskStatus}</td><td>${record.startedAt}</td><td>${record.expiresAt}</td><td>${record.completedAt}</td>
+        <td>${rewardTypeLabel(record.rewardType)}</td><td>${record.rewardStatus}</td><td><span class="tag ${record.paymentStatus === "打款成功" ? "tag-success" : record.paymentStatus === "打款失败" ? "tag-danger" : "tag-info"}">${record.paymentStatus}</span></td><td>${record.guestRewardStatus}</td>
+        <td>${canForceUpdate ? `<button class="btn btn-text" data-force-payment="${record.id}">强制更新打款状态</button>` : "-"}</td>
+      </tr>`;
+    }).join("") : `<tr><td colspan="16" class="empty">暂无数据</td></tr>`;
+    host.querySelectorAll("[data-force-payment]").forEach(button => { button.onclick = () => forceUpdatePayment(button.dataset.forcePayment); });
+  }
+
+  function filterTaskRows() {
+    const shareId = document.querySelector("#detailShareId").value.trim().toLowerCase();
+    const guestMid = document.querySelector("#detailGuestMid").value.trim();
+    const deviceNo = document.querySelector("#detailDeviceNo").value.trim().toLowerCase();
+    const rewardType = document.querySelector("#detailRewardType").value;
+    const subTaskType = document.querySelector("#detailSubTaskType").value;
+    drawTaskRows(state.tasks.filter(record => (!shareId || record.shareId.toLowerCase().includes(shareId)) && (!guestMid || record.guestMid.includes(guestMid)) && (!deviceNo || record.deviceNo.toLowerCase().includes(deviceNo)) && (!rewardType || record.rewardType === rewardType) && (!subTaskType || record.subTaskType === subTaskType)));
+  }
+
+  function forceUpdatePayment(taskId) {
+    const record = state.tasks.find(task => task.id === taskId);
+    if (!record || record.rewardType !== "cash" || !["未打款", "打款失败"].includes(record.paymentStatus)) return;
+    record.rewardStatus = "领取成功";
+    record.paymentStatus = "打款成功";
+    drawTaskRows(tasksForSelectedParticipation());
+    toast("打款状态更新成功");
   }
 
   function openEdit(code, readonly) {
@@ -230,13 +432,15 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     const ro = state.readonly ? "disabled" : "";
     main.innerHTML = `
       <div class="breadcrumb"><a id="fissionBack1">真车主裂变活动</a><i>›</i><a id="fissionBack2">活动配置</a><i>›</i><span>${state.readonly ? "查看" : draft.code === "保存后生成" ? "新建" : "编辑"}</span></div>
-      <div class="page-header"><div><h1>${state.readonly ? "查看真车主裂变活动" : draft.code === "保存后生成" ? "新建真车主裂变活动" : "编辑真车主裂变活动"}</h1><p>配置任务、主客态奖励、会员权益、页面素材、分享及用户触达</p></div><span class="tag ${draft.status ? "tag-success" : "tag-info"}">${draft.status ? "有效" : "无效"}</span></div>
+      <div class="page-header"><div><h1>${state.readonly ? "查看真车主裂变活动" : draft.code === "保存后生成" ? "新建真车主裂变活动" : "编辑真车主裂变活动"}</h1><p>配置司机裂变、乘客裂变、主客态奖励、页面素材及分享触达</p></div><span class="tag ${draft.status ? "tag-success" : "tag-info"}">${draft.status ? "有效" : "无效"}</span></div>
       <form id="fissionForm">
         ${renderBasicCard(draft, ro)}
         ${renderActivityCard(draft, ro)}
+        ${renderPassengerFissionCard(draft, ro)}
         ${renderMemberCard(draft, ro)}
         ${renderPageCard(draft, ro)}
         ${renderShareCard(draft, ro)}
+        ${renderPassengerShareCard(draft, ro)}
         ${renderPushCard(draft, ro)}
         <div class="form-footer">${state.readonly ? "" : `<button type="button" class="btn btn-primary solid" id="fissionSave">✓ 确定</button>`}<button type="button" class="btn" id="fissionClose">× 关闭</button></div>
       </form>`;
@@ -294,6 +498,23 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       ${combined ? `<div class="module-tip">认证任务使用普通奖励，首单任务使用现金奖励；两类任务分别累计可领取次数。</div>` : ""}`;
   }
 
+  function renderPassengerFissionCard(draft, ro) {
+    const enabled = draft.passengerFissionEnabled === "on";
+    return card("乘客裂变配置", `<div class="edit-grid single-column">
+      ${item("是否开启乘客裂变", `${radios("passengerFissionEnabled", [["off", "不开启"], ["on", "开启"]], draft.passengerFissionEnabled, ro)}<div class="helper">开启后，发起人可分别生成司机邀请和乘客邀请两个分享入口</div>`, true)}
+      ${enabled ? `
+        ${item("乘客参与范围", radios("passengerEligibility", [["new_only", "仅新客"], ["existing_only", "仅老客"], ["all", "新老客均可"]], draft.passengerEligibility, ro), true)}
+        ${item("乘客订单任务ID", `${select("passengerOrderTaskId", SELECT_OPTIONS.passengerOrder, draft.passengerOrderTaskId, ro)}${errorText("请选择乘客订单任务ID")}<div class="helper">任务有效期、订单类型和公里数等条件在任务中心配置</div>`, true, "error-passengerOrderTaskId")}
+        ${item("乘客裂变客态奖励", `${select("passengerVoucherReward", SELECT_OPTIONS.passengerVoucher, draft.passengerVoucherReward, ro)}${errorText("请选择乘客裂变客态奖励")}<div class="helper">乘客确认组队成功后立即发放；任务过期后重新组队可再次发放</div>`, true, "error-passengerVoucherReward")}
+        ${item("乘客裂变主态奖励类型", radios("passengerMasterRewardType", [["cash", "现金奖励"]], draft.passengerMasterRewardType, "disabled"), true)}
+        ${item("现金奖励金额", `${numberControl("passengerCashAmount", draft.passengerCashAmount, "元", ro)}${errorText("请输入大于0的整数金额")}`, true, "error-passengerCashAmount")}
+        ${item("乘客裂变主态奖励", `${select("passengerCashReward", SELECT_OPTIONS.passengerCashReward, draft.passengerCashReward, ro)}${errorText("请选择乘客裂变主态奖励")}`, true, "error-passengerCashReward")}
+        ${item("奖励可领取时间", `${numberControl("passengerClaimDelay", draft.passengerClaimDelay, "天后可领取", ro, 0)}${errorText("请输入大于等于0的整数天数")}<div class="helper">乘客完成订单任务后，奖励按现有司机裂变方式流转为可领取</div>`, true, "error-passengerClaimDelay")}
+        ${item("乘客裂变主态可领奖次数", `${numberControl("passengerClaimLimit", draft.passengerClaimLimit, "次", ro)}${errorText("请输入大于0的整数次数")}<div class="helper">达到上限后仍可继续邀请和组队，但发起人不再可领现金奖励</div>`, true, "error-passengerClaimLimit")}
+      ` : ""}
+    </div>`);
+  }
+
   function renderMemberCard(draft, ro) {
     const enabled = draft.memberBenefitEnabled === "on";
     return card("会员权益配置", `<div class="edit-grid single-column">
@@ -315,10 +536,19 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
   }
 
   function renderShareCard(draft, ro) {
-    return card("分享配置", `<div class="edit-grid single-column">
+    return card("司机裂变分享配置", `<div class="edit-grid single-column">
       ${item("分享主标题", `${input("shareTitle", draft.shareTitle, "请输入", ro)}${errorText("请输入分享主标题")}`, true, "error-shareTitle")}
       ${item("分享副标题", `${input("shareSubtitle", draft.shareSubtitle, "请输入", ro)}${errorText("请输入分享副标题")}`, true, "error-shareSubtitle")}
       ${item("小程序分享图", `${imageUpload("shareImage", draft.shareImage, ro)}<div class="helper">图片尺寸：150 × 150；建议最大128KB</div>${errorText("请上传小程序分享图")}`, true, "error-shareImage")}
+    </div>`);
+  }
+
+  function renderPassengerShareCard(draft, ro) {
+    if (draft.passengerFissionEnabled !== "on") return "";
+    return card("乘客裂变分享配置", `<div class="edit-grid single-column">
+      ${item("乘客分享主标题", `${input("passengerShareTitle", draft.passengerShareTitle, "请输入乘客邀请分享主标题", ro)}${errorText("请输入乘客分享主标题")}`, true, "error-passengerShareTitle")}
+      ${item("乘客分享副标题", `${input("passengerShareSubtitle", draft.passengerShareSubtitle, "请输入乘客邀请分享副标题", ro)}${errorText("请输入乘客分享副标题")}`, true, "error-passengerShareSubtitle")}
+      ${item("乘客小程序分享图", `${imageUpload("passengerShareImage", draft.passengerShareImage, ro)}<div class="helper">图片尺寸：150 × 150；建议最大128KB</div>${errorText("请上传乘客小程序分享图")}`, true, "error-passengerShareImage")}
     </div>`);
   }
 
@@ -342,6 +572,11 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     bindRadio("riskControl");
     bindRadio("status", value => { state.draft.status = Number(value); });
     bindRadio("memberBenefitStart");
+    bindRadio("passengerEligibility");
+    bindRadio("passengerFissionEnabled", value => {
+      state.draft.passengerFissionEnabled = value;
+      renderEdit();
+    });
     bindRadio("taskType", value => {
       state.draft.taskType = value;
       if (value === "first_order") clearCertificationConfig();
@@ -464,6 +699,13 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       validatePositiveInteger(draft.orderClaimLimit, "orderClaimLimit", errors);
     }
     if (draft.memberBenefitEnabled === "on" && !draft.memberBenefitCode.trim()) errors.push("memberBenefitCode");
+    if (draft.passengerFissionEnabled === "on") {
+      const passengerRequired = ["passengerOrderTaskId", "passengerVoucherReward", "passengerCashReward", "passengerShareTitle", "passengerShareSubtitle", "passengerShareImage"];
+      passengerRequired.forEach(key => { if (!String(draft[key] || "").trim()) errors.push(key); });
+      validatePositiveInteger(draft.passengerCashAmount, "passengerCashAmount", errors);
+      validateNonNegativeInteger(draft.passengerClaimDelay, "passengerClaimDelay", errors);
+      validatePositiveInteger(draft.passengerClaimLimit, "passengerClaimLimit", errors);
+    }
     return [...new Set(errors)];
   }
 
@@ -485,10 +727,15 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     title: "真车主裂变活动",
     icon: "♧",
     defaultRoute: `${ACTIVITY_ID}/list`,
-    menuItems: [{ title: "真车主裂变活动配置", route: `${ACTIVITY_ID}/list`, activeRoutes: [`${ACTIVITY_ID}/list`, `${ACTIVITY_ID}/edit`] }],
+    menuItems: [
+      { title: "真车主裂变活动配置", route: `${ACTIVITY_ID}/list`, activeRoutes: [`${ACTIVITY_ID}/list`, `${ACTIVITY_ID}/edit`] },
+      { title: "真车主裂变活动数据", route: `${ACTIVITY_ID}/data`, activeRoutes: [`${ACTIVITY_ID}/data`, `${ACTIVITY_ID}/data-detail`] },
+    ],
     routes: {
       [`${ACTIVITY_ID}/list`]: () => renderPage("list"),
       [`${ACTIVITY_ID}/edit`]: () => renderPage("edit"),
+      [`${ACTIVITY_ID}/data`]: () => renderPage("data"),
+      [`${ACTIVITY_ID}/data-detail`]: () => renderPage("data-detail"),
     },
   };
 }
