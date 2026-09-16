@@ -161,12 +161,12 @@ function seedRecord(overrides = {}) {
 
 function seedParticipationRecords() {
   return [
-    { activityCode: "FISSION-202606-002", hostMid: "1728696355", shareId: "3a00a5663f9c", taskType: "first_order", joinedAt: "2026-09-16 16:33:25", claimable: { ordinary: 0, cash: 30 }, claimed: { ordinary: 0, cash: 0 } },
-    { activityCode: "FISSION-202606-002", hostMid: "2062421952", shareId: "c7cec6971a42", taskType: "first_order", joinedAt: "2026-09-16 16:32:15", claimable: { ordinary: 0, cash: 30 }, claimed: { ordinary: 0, cash: 0 } },
-    { activityCode: "FISSION-202606-002", hostMid: "3365504441", shareId: "e57777642c81", taskType: "first_order", joinedAt: "2026-09-16 16:31:18", claimable: { ordinary: 0, cash: 30 }, claimed: { ordinary: 0, cash: 0 } },
-    { activityCode: "FISSION-202609-001", hostMid: "3567297664", shareId: "0f705f1c601b", taskType: "combined", joinedAt: "2026-06-27 09:49:24", claimable: { ordinary: 30, cash: 30 }, claimed: { ordinary: 0, cash: 0 } },
-    { activityCode: "FISSION-202609-001", hostMid: "1434376038", shareId: "6d8ea106be32", taskType: "combined", joinedAt: "2026-06-22 20:26:09", claimable: { ordinary: 30, cash: 30 }, claimed: { ordinary: 3, cash: 1 } },
-    { activityCode: "FISSION-202601-006", hostMid: "3555708953", shareId: "9a1ab127bb94", taskType: "certification", joinedAt: "2026-06-16 16:09:23", claimable: { ordinary: 12, cash: 0 }, claimed: { ordinary: 5, cash: 0 } },
+    { activityCode: "FISSION-202606-002", hostMid: "1728696355", shareId: "3a00a5663f9c", taskType: "first_order", joinedAt: "2026-09-16 16:33:25", claimable: { ordinary: 0, cash: 30 }, claimed: { ordinary: 0, cash: 0 }, passengerClaimable: 0, passengerClaimed: 0 },
+    { activityCode: "FISSION-202606-002", hostMid: "2062421952", shareId: "c7cec6971a42", taskType: "first_order", joinedAt: "2026-09-16 16:32:15", claimable: { ordinary: 0, cash: 30 }, claimed: { ordinary: 0, cash: 0 }, passengerClaimable: 0, passengerClaimed: 0 },
+    { activityCode: "FISSION-202606-002", hostMid: "3365504441", shareId: "e57777642c81", taskType: "first_order", joinedAt: "2026-09-16 16:31:18", claimable: { ordinary: 0, cash: 30 }, claimed: { ordinary: 0, cash: 0 }, passengerClaimable: 0, passengerClaimed: 0 },
+    { activityCode: "FISSION-202609-001", hostMid: "3567297664", shareId: "0f705f1c601b", taskType: "combined", joinedAt: "2026-06-27 09:49:24", claimable: { ordinary: 30, cash: 30 }, claimed: { ordinary: 0, cash: 0 }, passengerClaimable: 5, passengerClaimed: 0 },
+    { activityCode: "FISSION-202609-001", hostMid: "1434376038", shareId: "6d8ea106be32", taskType: "combined", joinedAt: "2026-06-22 20:26:09", claimable: { ordinary: 30, cash: 30 }, claimed: { ordinary: 3, cash: 1 }, passengerClaimable: 5, passengerClaimed: 2 },
+    { activityCode: "FISSION-202601-006", hostMid: "3555708953", shareId: "9a1ab127bb94", taskType: "certification", joinedAt: "2026-06-16 16:09:23", claimable: { ordinary: 12, cash: 0 }, claimed: { ordinary: 5, cash: 0 }, passengerClaimable: 0, passengerClaimed: 0 },
   ];
 }
 
@@ -275,7 +275,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       </section>
       <section>
         <div class="table-titlebar"><span class="table-title">裂变活动参与数据</span><span id="participationCount" style="color:#909399;font-size:12px"></span></div>
-        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>主态mid</th><th>分享ID</th><th>任务类型</th><th>活动参与时间</th><th>可领奖总次数</th><th>已领奖总次数</th><th>操作</th></tr></thead><tbody id="participationRows"></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>主态mid</th><th>分享ID</th><th>任务类型</th><th>活动参与时间</th><th>司机裂变可领奖总次数</th><th>司机已领奖总次数</th><th>乘客裂变可领奖总次数</th><th>乘客裂变已领奖总次数</th><th>操作</th></tr></thead><tbody id="participationRows"></tbody></table></div>
         <div class="pagination"><span id="participationPaginationCount"></span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
       </section>`;
     drawParticipationRows(state.participations);
@@ -307,8 +307,9 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     host.innerHTML = records.length ? records.map((record, index) => `<tr>
       <td>${index + 1}</td><td>${record.activityCode}</td><td>${record.hostMid}</td><td class="ellipsis-cell" title="${record.shareId}">${record.shareId}</td>
       <td>${TASK_LABELS[record.taskType]}</td><td>${record.joinedAt}</td><td>${rewardCountLines(record, "claimable")}</td><td>${rewardCountLines(record, "claimed")}</td>
+      <td>${record.passengerClaimable}</td><td>${record.passengerClaimed}</td>
       <td><button class="btn btn-text" data-participation-detail="${record.shareId}">查看明细</button></td>
-    </tr>`).join("") : `<tr><td colspan="9" class="empty">暂无数据</td></tr>`;
+    </tr>`).join("") : `<tr><td colspan="11" class="empty">暂无数据</td></tr>`;
     host.querySelectorAll("[data-participation-detail]").forEach(button => {
       button.onclick = () => {
         state.selectedShareId = button.dataset.participationDetail;
