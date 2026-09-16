@@ -6,7 +6,10 @@ const TASK_LABELS = {
   certification: "认证任务",
   first_order: "首单任务",
   combined: "认证+首单任务",
+  order: "订单任务",
 };
+
+const FISSION_TYPE_LABELS = { driver: "司机裂变", passenger: "乘客裂变" };
 
 const SELECT_OPTIONS = {
   certification: [
@@ -172,12 +175,13 @@ function seedParticipationRecords() {
 
 function seedTaskRecords() {
   return [
-    { id: "TASK-27771", shareId: "3a00a5663f9c", guestMid: "3603557583", deviceNo: "DEVICE-A102", taskNo: "TST0Z6TT001", taskType: "first_order", subTaskType: "首单完单", taskStatus: "进行中", startedAt: "2026-09-16 16:16:41", expiresAt: "2026-09-23 16:16:40", completedAt: "-", rewardType: "cash", rewardStatus: "初始化", paymentStatus: "未打款", guestRewardStatus: "领取成功" },
-    { id: "TASK-27772", shareId: "3a00a5663f9c", guestMid: "1592063031", deviceNo: "DEVICE-B208", taskNo: "TSRH6Y4E002", taskType: "first_order", subTaskType: "首单完单", taskStatus: "已完成", startedAt: "2026-09-16 16:25:59", expiresAt: "2026-09-23 16:25:59", completedAt: "2026-09-18 10:22:16", rewardType: "cash", rewardStatus: "领取失败", paymentStatus: "打款失败", guestRewardStatus: "领取成功" },
-    { id: "TASK-27773", shareId: "0f705f1c601b", guestMid: "1883201145", deviceNo: "DEVICE-C319", taskNo: "CERT2026003", taskType: "combined", subTaskType: "认证任务", taskStatus: "已完成", startedAt: "2026-06-27 10:01:12", expiresAt: "2026-07-04 10:01:12", completedAt: "2026-06-27 11:15:32", rewardType: "ordinary", rewardStatus: "领取成功", paymentStatus: "-", guestRewardStatus: "领取成功" },
-    { id: "TASK-27774", shareId: "0f705f1c601b", guestMid: "1883201145", deviceNo: "DEVICE-C319", taskNo: "ORDER2026004", taskType: "combined", subTaskType: "首单任务", taskStatus: "已完成", startedAt: "2026-06-27 11:16:00", expiresAt: "2026-07-04 11:16:00", completedAt: "2026-06-28 09:08:27", rewardType: "cash", rewardStatus: "初始化", paymentStatus: "未打款", guestRewardStatus: "领取成功" },
-    { id: "TASK-27775", shareId: "6d8ea106be32", guestMid: "2095517632", deviceNo: "DEVICE-D427", taskNo: "ORDER2026005", taskType: "combined", subTaskType: "首单任务", taskStatus: "已完成", startedAt: "2026-06-22 20:35:18", expiresAt: "2026-06-29 20:35:18", completedAt: "2026-06-24 08:42:11", rewardType: "cash", rewardStatus: "领取成功", paymentStatus: "打款成功", guestRewardStatus: "领取成功" },
-    { id: "TASK-27776", shareId: "9a1ab127bb94", guestMid: "2261095804", deviceNo: "DEVICE-E531", taskNo: "CERT2026006", taskType: "certification", subTaskType: "认证任务", taskStatus: "已完成", startedAt: "2026-06-16 16:20:15", expiresAt: "2026-06-23 16:20:15", completedAt: "2026-06-18 14:30:41", rewardType: "ordinary", rewardStatus: "领取成功", paymentStatus: "-", guestRewardStatus: "领取成功" },
+    { id: "TASK-27771", shareId: "3a00a5663f9c", guestMid: "3603557583", deviceNo: "DEVICE-A102", taskNo: "TST0Z6TT001", fissionType: "driver", taskType: "first_order", subTaskType: "首单完单", taskStatus: "进行中", startedAt: "2026-09-16 16:16:41", expiresAt: "2026-09-23 16:16:40", completedAt: "-", rewardType: "cash", rewardStatus: "初始化", paymentStatus: "未打款", guestRewardStatus: "领取成功" },
+    { id: "TASK-27772", shareId: "3a00a5663f9c", guestMid: "1592063031", deviceNo: "DEVICE-B208", taskNo: "TSRH6Y4E002", fissionType: "driver", taskType: "first_order", subTaskType: "首单完单", taskStatus: "已完成", startedAt: "2026-09-16 16:25:59", expiresAt: "2026-09-23 16:25:59", completedAt: "2026-09-18 10:22:16", rewardType: "cash", rewardStatus: "领取失败", paymentStatus: "打款失败", guestRewardStatus: "领取成功" },
+    { id: "TASK-27773", shareId: "0f705f1c601b", guestMid: "1883201145", deviceNo: "DEVICE-C319", taskNo: "CERT2026003", fissionType: "driver", taskType: "combined", subTaskType: "认证任务", taskStatus: "已完成", startedAt: "2026-06-27 10:01:12", expiresAt: "2026-07-04 10:01:12", completedAt: "2026-06-27 11:15:32", rewardType: "ordinary", rewardStatus: "领取成功", paymentStatus: "-", guestRewardStatus: "领取成功" },
+    { id: "TASK-27774", shareId: "0f705f1c601b", guestMid: "1883201145", deviceNo: "DEVICE-C319", taskNo: "ORDER2026004", fissionType: "driver", taskType: "combined", subTaskType: "首单任务", taskStatus: "已完成", startedAt: "2026-06-27 11:16:00", expiresAt: "2026-07-04 11:16:00", completedAt: "2026-06-28 09:08:27", rewardType: "cash", rewardStatus: "初始化", paymentStatus: "未打款", guestRewardStatus: "领取成功" },
+    { id: "TASK-27775", shareId: "6d8ea106be32", guestMid: "2095517632", deviceNo: "DEVICE-D427", taskNo: "ORDER2026005", fissionType: "driver", taskType: "combined", subTaskType: "首单任务", taskStatus: "已完成", startedAt: "2026-06-22 20:35:18", expiresAt: "2026-06-29 20:35:18", completedAt: "2026-06-24 08:42:11", rewardType: "cash", rewardStatus: "领取成功", paymentStatus: "打款成功", guestRewardStatus: "领取成功" },
+    { id: "TASK-27776", shareId: "9a1ab127bb94", guestMid: "2261095804", deviceNo: "DEVICE-E531", taskNo: "CERT2026006", fissionType: "driver", taskType: "certification", subTaskType: "认证任务", taskStatus: "已完成", startedAt: "2026-06-16 16:20:15", expiresAt: "2026-06-23 16:20:15", completedAt: "2026-06-18 14:30:41", rewardType: "ordinary", rewardStatus: "领取成功", paymentStatus: "-", guestRewardStatus: "领取成功" },
+    { id: "TASK-27777", shareId: "0f705f1c601b", guestMid: "3187064215", deviceNo: "DEVICE-P612", taskNo: "PASSENGER2026007", fissionType: "passenger", taskType: "order", subTaskType: "订单任务", taskStatus: "已完成", startedAt: "2026-06-28 12:08:10", expiresAt: "2026-07-05 12:08:10", completedAt: "2026-06-29 18:26:40", rewardType: "cash", rewardStatus: "初始化", paymentStatus: "未打款", guestRewardStatus: "领取成功" },
   ];
 }
 
@@ -326,14 +330,15 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
           <div class="form-field"><label>分享Id：</label><input id="detailShareId" value="${state.selectedShareId}" placeholder="请输入"></div>
           <div class="form-field"><label>客态mid：</label><input id="detailGuestMid" placeholder="请输入"></div>
           <div class="form-field"><label>设备号：</label><input id="detailDeviceNo" placeholder="请输入"></div>
+          <div class="form-field"><label>裂变类型：</label><select id="detailFissionType"><option value="">全部</option><option value="driver">司机裂变</option><option value="passenger">乘客裂变</option></select></div>
           <div class="form-field"><label>主态奖励类型：</label><select id="detailRewardType"><option value="">全部</option><option value="ordinary">普通奖励</option><option value="cash">现金奖励</option></select></div>
-          <div class="form-field"><label>子任务类型：</label><select id="detailSubTaskType"><option value="">全部</option><option value="认证任务">认证任务</option><option value="首单任务">首单任务</option><option value="首单完单">首单完单</option></select></div>
+          <div class="form-field"><label>子任务类型：</label><select id="detailSubTaskType"><option value="">全部</option><option value="认证任务">认证任务</option><option value="首单任务">首单任务</option><option value="首单完单">首单完单</option><option value="订单任务">订单任务</option></select></div>
         </div>
         <div class="query-actions"><button class="btn btn-primary" id="detailQuery">⌕ 查询</button><button class="btn btn-primary" id="detailReset">↻ 重置</button></div>
       </section>
       <section>
         <div class="table-titlebar"><span class="table-title">客态任务明细</span><span id="taskCount" style="color:#909399;font-size:12px"></span></div>
-        <div class="table-wrap"><table class="extra-wide"><thead><tr><th>序号</th><th>分享ID</th><th>客态mid</th><th>设备号</th><th>taskNo</th><th>任务类型</th><th>子任务类型</th><th>任务状态</th><th>任务开始时间</th><th>任务过期时间</th><th>任务完成时间</th><th>主态奖励类型</th><th>主态奖励状态</th><th>打款状态</th><th>客态奖励状态</th><th>操作</th></tr></thead><tbody id="taskRows"></tbody></table></div>
+        <div class="table-wrap"><table class="extra-wide"><thead><tr><th>序号</th><th>分享ID</th><th>客态mid</th><th>设备号</th><th>taskNo</th><th>裂变类型</th><th>任务类型</th><th>子任务类型</th><th>任务状态</th><th>任务开始时间</th><th>任务过期时间</th><th>任务完成时间</th><th>主态奖励类型</th><th>主态奖励状态</th><th>打款状态</th><th>客态奖励状态</th><th>操作</th></tr></thead><tbody id="taskRows"></tbody></table></div>
         <div class="pagination"><span id="taskPaginationCount"></span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
       </section>`;
     ["backToFissionData", "backToFissionData2"].forEach(id => { document.querySelector(`#${id}`).onclick = () => go("data"); });
@@ -341,7 +346,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     document.querySelector("#detailQuery").onclick = filterTaskRows;
     document.querySelector("#detailReset").onclick = () => {
       document.querySelector("#detailShareId").value = state.selectedShareId;
-      ["detailGuestMid", "detailDeviceNo", "detailRewardType", "detailSubTaskType"].forEach(id => { document.querySelector(`#${id}`).value = ""; });
+      ["detailGuestMid", "detailDeviceNo", "detailFissionType", "detailRewardType", "detailSubTaskType"].forEach(id => { document.querySelector(`#${id}`).value = ""; });
       toast("筛选条件已重置，请点击查询");
     };
   }
@@ -362,11 +367,11 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       const canForceUpdate = record.rewardType === "cash" && ["未打款", "打款失败"].includes(record.paymentStatus);
       return `<tr>
         <td>${index + 1}</td><td class="ellipsis-cell" title="${record.shareId}">${record.shareId}</td><td>${record.guestMid}</td><td>${record.deviceNo}</td><td>${record.taskNo}</td>
-        <td>${TASK_LABELS[record.taskType]}</td><td>${record.subTaskType}</td><td>${record.taskStatus}</td><td>${record.startedAt}</td><td>${record.expiresAt}</td><td>${record.completedAt}</td>
+        <td>${FISSION_TYPE_LABELS[record.fissionType]}</td><td>${record.fissionType === "passenger" ? "订单任务" : TASK_LABELS[record.taskType]}</td><td>${record.fissionType === "passenger" ? "订单任务" : record.subTaskType}</td><td>${record.taskStatus}</td><td>${record.startedAt}</td><td>${record.expiresAt}</td><td>${record.completedAt}</td>
         <td>${rewardTypeLabel(record.rewardType)}</td><td>${record.rewardStatus}</td><td><span class="tag ${record.paymentStatus === "打款成功" ? "tag-success" : record.paymentStatus === "打款失败" ? "tag-danger" : "tag-info"}">${record.paymentStatus}</span></td><td>${record.guestRewardStatus}</td>
         <td>${canForceUpdate ? `<button class="btn btn-text" data-force-payment="${record.id}">强制更新打款状态</button>` : "-"}</td>
       </tr>`;
-    }).join("") : `<tr><td colspan="16" class="empty">暂无数据</td></tr>`;
+    }).join("") : `<tr><td colspan="17" class="empty">暂无数据</td></tr>`;
     host.querySelectorAll("[data-force-payment]").forEach(button => { button.onclick = () => forceUpdatePayment(button.dataset.forcePayment); });
   }
 
@@ -374,9 +379,10 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     const shareId = document.querySelector("#detailShareId").value.trim().toLowerCase();
     const guestMid = document.querySelector("#detailGuestMid").value.trim();
     const deviceNo = document.querySelector("#detailDeviceNo").value.trim().toLowerCase();
+    const fissionType = document.querySelector("#detailFissionType").value;
     const rewardType = document.querySelector("#detailRewardType").value;
     const subTaskType = document.querySelector("#detailSubTaskType").value;
-    drawTaskRows(state.tasks.filter(record => (!shareId || record.shareId.toLowerCase().includes(shareId)) && (!guestMid || record.guestMid.includes(guestMid)) && (!deviceNo || record.deviceNo.toLowerCase().includes(deviceNo)) && (!rewardType || record.rewardType === rewardType) && (!subTaskType || record.subTaskType === subTaskType)));
+    drawTaskRows(state.tasks.filter(record => (!shareId || record.shareId.toLowerCase().includes(shareId)) && (!guestMid || record.guestMid.includes(guestMid)) && (!deviceNo || record.deviceNo.toLowerCase().includes(deviceNo)) && (!fissionType || record.fissionType === fissionType) && (!rewardType || record.rewardType === rewardType) && (!subTaskType || record.subTaskType === subTaskType)));
   }
 
   function forceUpdatePayment(taskId) {
