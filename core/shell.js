@@ -14,7 +14,7 @@ export function createShell({ host, activities, navigate }) {
           ${activity.menuItems.map(item => `
             <a class="subnav-item" href="#/${item.route}" data-route="${item.route}">
               <span>${item.title}</span>
-              ${item.requirementChange ? `<span class="nav-change-badge" data-requirement-marker="${item.requirementChange}">改</span>` : ""}
+              ${item.requirementChanges?.length ? `<span class="nav-change-badge" data-requirement-names="${item.requirementChanges.join("|")}">改</span>` : ""}
             </a>
           `).join("")}
         </div>

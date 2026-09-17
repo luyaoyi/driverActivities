@@ -1,7 +1,9 @@
 import { createMockActivityRepository } from "../../data/mock-activity-repository.js";
+import { isRequirementSelected } from "../../core/requirement-view.js";
 import { card, imageUpload, item, nowText, radios, toast } from "../../shared/ui.js";
 
 const ACTIVITY_ID = "driver-fission";
+const PASSENGER_REFERRAL_REQUIREMENT = "司乘互推";
 const TASK_LABELS = {
   certification: "认证任务",
   first_order: "首单任务",
@@ -12,8 +14,12 @@ const TASK_LABELS = {
 const FISSION_TYPE_LABELS = { driver: "司机裂变", passenger: "乘客裂变" };
 const PASSENGER_REWARD_TYPE_LABELS = { cash: "现金奖励" };
 
-function changeBadge(text = "本次新增", variant = "new") {
-  return `<span class="change-badge change-badge-${variant}">${text}</span>`;
+function passengerReferralEnabled() {
+  return isRequirementSelected(PASSENGER_REFERRAL_REQUIREMENT);
+}
+
+function changeBadge(target, text = "本次新增", variant = "new") {
+  return `<button type="button" class="change-badge change-badge-${variant}" data-change-point="${target}" title="查看对应改动说明">${text}</button>`;
 }
 
 const SELECT_OPTIONS = {
@@ -221,6 +227,9 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
 
   function renderList() {
     const records = repository.list();
+    const passengerReferral = passengerReferralEnabled();
+    const taskTypeHeading = passengerReferral ? `司机任务类型 ${changeBadge("list-driver-task-type", "本次调整", "updated")}` : "任务类型";
+    const passengerHeading = passengerReferral ? `<th>乘客裂变 ${changeBadge("list-passenger-fission")}</th>` : "";
     main.innerHTML = `
       <div class="breadcrumb"><a>真车主裂变活动</a><i>›</i><span>活动配置</span></div>
       <section class="panel">
@@ -237,7 +246,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       </section>
       <section>
         <div class="table-titlebar"><span class="table-title">真车主裂变活动配置</span><span id="fissionCount" style="color:#909399;font-size:12px">共 ${records.length} 条</span></div>
-        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>活动名称</th><th>司机任务类型 ${changeBadge("本次调整", "updated")}</th><th>乘客裂变 ${changeBadge()}</th><th>状态</th><th>创建人</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="fissionRows"></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>活动名称</th><th>${taskTypeHeading}</th>${passengerHeading}<th>状态</th><th>创建人</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="fissionRows"></tbody></table></div>
         <div class="pagination"><span>共 ${records.length} 条</span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
       </section>`;
     drawRows(records);
@@ -251,14 +260,15 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
 
   function drawRows(records) {
     const host = document.querySelector("#fissionRows");
+    const passengerReferral = passengerReferralEnabled();
     document.querySelector("#fissionCount").textContent = `共 ${records.length} 条`;
     host.innerHTML = records.length ? records.map((record, index) => `<tr>
       <td>${index + 1}</td><td>${record.code}</td><td>${record.name}</td><td>${TASK_LABELS[record.taskType]}</td>
-      <td><span class="tag ${record.passengerFissionEnabled === "on" ? "tag-success" : "tag-info"}">${record.passengerFissionEnabled === "on" ? "已开启" : "未开启"}</span></td>
+      ${passengerReferral ? `<td><span class="tag ${record.passengerFissionEnabled === "on" ? "tag-success" : "tag-info"}">${record.passengerFissionEnabled === "on" ? "已开启" : "未开启"}</span></td>` : ""}
       <td><span class="tag ${record.status ? "tag-success" : "tag-info"}">${record.status ? "有效" : "无效"}</span></td>
       <td>${record.creator}</td><td>${record.created}</td>
       <td><button class="btn btn-text" data-fission-view="${record.code}">查看</button><button class="btn btn-text" data-fission-edit="${record.code}">编辑</button><button class="btn btn-text" data-fission-log="${record.code}">日志</button></td>
-    </tr>`).join("") : `<tr><td colspan="9" class="empty">暂无数据</td></tr>`;
+    </tr>`).join("") : `<tr><td colspan="${passengerReferral ? 9 : 8}" class="empty">暂无数据</td></tr>`;
     host.querySelectorAll("[data-fission-view]").forEach(button => { button.onclick = () => openEdit(button.dataset.fissionView, true); });
     host.querySelectorAll("[data-fission-edit]").forEach(button => { button.onclick = () => openEdit(button.dataset.fissionEdit, false); });
     host.querySelectorAll("[data-fission-log]").forEach(button => { button.onclick = () => showLogs(button.dataset.fissionLog); });
@@ -272,6 +282,10 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
   }
 
   function renderData() {
+    const passengerReferral = passengerReferralEnabled();
+    const claimableHeading = passengerReferral ? `司机裂变可领奖总次数 ${changeBadge("data-driver-claimable", "本次调整", "updated")}` : "可领奖总次数";
+    const claimedHeading = passengerReferral ? `司机已领奖总次数 ${changeBadge("data-driver-claimed", "本次调整", "updated")}` : "已领奖总次数";
+    const passengerHeadings = passengerReferral ? `<th>乘客裂变可领奖总次数 ${changeBadge("data-passenger-claimable")}</th><th>乘客裂变已领奖总次数 ${changeBadge("data-passenger-claimed")}</th>` : "";
     main.innerHTML = `
       <div class="breadcrumb"><a>真车主裂变活动</a><i>›</i><span>活动数据</span></div>
       <section class="panel">
@@ -284,7 +298,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       </section>
       <section>
         <div class="table-titlebar"><span class="table-title">裂变活动参与数据</span><span id="participationCount" style="color:#909399;font-size:12px"></span></div>
-        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>主态mid</th><th>分享ID</th><th>任务类型</th><th>活动参与时间</th><th>司机裂变可领奖总次数 ${changeBadge("本次调整", "updated")}</th><th>司机已领奖总次数 ${changeBadge("本次调整", "updated")}</th><th>乘客裂变可领奖总次数 ${changeBadge()}</th><th>乘客裂变已领奖总次数 ${changeBadge()}</th><th>操作</th></tr></thead><tbody id="participationRows"></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>主态mid</th><th>分享ID</th><th>任务类型</th><th>活动参与时间</th><th>${claimableHeading}</th><th>${claimedHeading}</th>${passengerHeadings}<th>操作</th></tr></thead><tbody id="participationRows"></tbody></table></div>
         <div class="pagination"><span id="participationPaginationCount"></span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
       </section>`;
     drawParticipationRows(state.participations);
@@ -318,14 +332,15 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
 
   function drawParticipationRows(records) {
     const host = document.querySelector("#participationRows");
+    const passengerReferral = passengerReferralEnabled();
     document.querySelector("#participationCount").textContent = `共 ${records.length} 条`;
     document.querySelector("#participationPaginationCount").textContent = `共 ${records.length} 条`;
     host.innerHTML = records.length ? records.map((record, index) => `<tr>
       <td>${index + 1}</td><td>${record.activityCode}</td><td>${record.hostMid}</td><td class="ellipsis-cell" title="${record.shareId}">${record.shareId}</td>
       <td>${TASK_LABELS[record.taskType]}</td><td>${record.joinedAt}</td><td>${rewardCountLines(record, "claimable")}</td><td>${rewardCountLines(record, "claimed")}</td>
-      <td>${passengerRewardCountLine(record, "passengerClaimable")}</td><td>${passengerRewardCountLine(record, "passengerClaimed")}</td>
+      ${passengerReferral ? `<td>${passengerRewardCountLine(record, "passengerClaimable")}</td><td>${passengerRewardCountLine(record, "passengerClaimed")}</td>` : ""}
       <td><button class="btn btn-text" data-participation-detail="${record.shareId}">查看明细</button></td>
-    </tr>`).join("") : `<tr><td colspan="11" class="empty">暂无数据</td></tr>`;
+    </tr>`).join("") : `<tr><td colspan="${passengerReferral ? 11 : 9}" class="empty">暂无数据</td></tr>`;
     host.querySelectorAll("[data-participation-detail]").forEach(button => {
       button.onclick = () => {
         state.selectedShareId = button.dataset.participationDetail;
@@ -344,6 +359,13 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
   function renderDataDetail() {
     if (!state.selectedShareId) state.selectedShareId = state.participations[0]?.shareId || "";
     const selectedParticipation = state.participations.find(record => record.shareId === state.selectedShareId);
+    const passengerReferral = passengerReferralEnabled();
+    const fissionFilter = passengerReferral ? `<div class="form-field"><label>裂变类型 ${changeBadge("detail-fission-filter")}：</label><select id="detailFissionType"><option value="">全部</option><option value="driver">司机裂变</option><option value="passenger">乘客裂变</option></select></div>` : "";
+    const orderTaskOption = passengerReferral ? `<option value="订单任务">订单任务</option>` : "";
+    const subTaskBadge = passengerReferral ? changeBadge("detail-subtask-filter", "本次调整", "updated") : "";
+    const fissionColumn = passengerReferral ? `<th>裂变类型 ${changeBadge("detail-fission-column")}</th>` : "";
+    const taskTypeBadge = passengerReferral ? changeBadge("detail-task-type", "本次调整", "updated") : "";
+    const subTaskColumnBadge = passengerReferral ? changeBadge("detail-subtask-column", "本次调整", "updated") : "";
     main.innerHTML = `
       <div class="breadcrumb"><a id="backToFissionData">真车主裂变活动</a><i>›</i><a id="backToFissionData2">活动数据</a><i>›</i><span>任务明细</span></div>
       <div class="page-header"><div><h1>裂变任务明细</h1><p>${selectedParticipation ? `主态mid：${selectedParticipation.hostMid}　活动编号：${selectedParticipation.activityCode}` : "查看客态任务及奖励状态"}</p></div></div>
@@ -352,15 +374,15 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
           <div class="form-field"><label>分享Id：</label><input id="detailShareId" value="${state.selectedShareId}" placeholder="请输入"></div>
           <div class="form-field"><label>客态mid：</label><input id="detailGuestMid" placeholder="请输入"></div>
           <div class="form-field"><label>设备号：</label><input id="detailDeviceNo" placeholder="请输入"></div>
-          <div class="form-field"><label>裂变类型 ${changeBadge()}：</label><select id="detailFissionType"><option value="">全部</option><option value="driver">司机裂变</option><option value="passenger">乘客裂变</option></select></div>
+          ${fissionFilter}
           <div class="form-field"><label>主态奖励类型：</label><select id="detailRewardType"><option value="">全部</option><option value="ordinary">普通奖励</option><option value="cash">现金奖励</option></select></div>
-          <div class="form-field"><label>子任务类型 ${changeBadge("本次调整", "updated")}：</label><select id="detailSubTaskType"><option value="">全部</option><option value="认证任务">认证任务</option><option value="首单任务">首单任务</option><option value="首单完单">首单完单</option><option value="订单任务">订单任务</option></select></div>
+          <div class="form-field"><label>子任务类型 ${subTaskBadge}：</label><select id="detailSubTaskType"><option value="">全部</option><option value="认证任务">认证任务</option><option value="首单任务">首单任务</option><option value="首单完单">首单完单</option>${orderTaskOption}</select></div>
         </div>
         <div class="query-actions"><button class="btn btn-primary" id="detailQuery">⌕ 查询</button><button class="btn btn-primary" id="detailReset">↻ 重置</button></div>
       </section>
       <section>
         <div class="table-titlebar"><span class="table-title">客态任务明细</span><span id="taskCount" style="color:#909399;font-size:12px"></span></div>
-        <div class="table-wrap"><table class="extra-wide"><thead><tr><th>序号</th><th>分享ID</th><th>客态mid</th><th>设备号</th><th>taskNo</th><th>裂变类型 ${changeBadge()}</th><th>任务类型 ${changeBadge("本次调整", "updated")}</th><th>子任务类型 ${changeBadge("本次调整", "updated")}</th><th>任务状态</th><th>任务开始时间</th><th>任务过期时间</th><th>任务完成时间</th><th>主态奖励类型</th><th>主态奖励状态</th><th>打款状态</th><th>客态奖励状态</th><th>操作</th></tr></thead><tbody id="taskRows"></tbody></table></div>
+        <div class="table-wrap"><table class="extra-wide"><thead><tr><th>序号</th><th>分享ID</th><th>客态mid</th><th>设备号</th><th>taskNo</th>${fissionColumn}<th>任务类型 ${taskTypeBadge}</th><th>子任务类型 ${subTaskColumnBadge}</th><th>任务状态</th><th>任务开始时间</th><th>任务过期时间</th><th>任务完成时间</th><th>主态奖励类型</th><th>主态奖励状态</th><th>打款状态</th><th>客态奖励状态</th><th>操作</th></tr></thead><tbody id="taskRows"></tbody></table></div>
         <div class="pagination"><span id="taskPaginationCount"></span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
       </section>`;
     ["backToFissionData", "backToFissionData2"].forEach(id => { document.querySelector(`#${id}`).onclick = () => go("data"); });
@@ -368,13 +390,13 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     document.querySelector("#detailQuery").onclick = filterTaskRows;
     document.querySelector("#detailReset").onclick = () => {
       document.querySelector("#detailShareId").value = state.selectedShareId;
-      ["detailGuestMid", "detailDeviceNo", "detailFissionType", "detailRewardType", "detailSubTaskType"].forEach(id => { document.querySelector(`#${id}`).value = ""; });
+      ["detailGuestMid", "detailDeviceNo", "detailFissionType", "detailRewardType", "detailSubTaskType"].forEach(id => { const control = document.querySelector(`#${id}`); if (control) control.value = ""; });
       toast("筛选条件已重置，请点击查询");
     };
   }
 
   function tasksForSelectedParticipation() {
-    return state.tasks.filter(record => record.shareId === state.selectedShareId);
+    return state.tasks.filter(record => record.shareId === state.selectedShareId && (passengerReferralEnabled() || record.fissionType !== "passenger"));
   }
 
   function rewardTypeLabel(type) {
@@ -383,17 +405,18 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
 
   function drawTaskRows(records) {
     const host = document.querySelector("#taskRows");
+    const passengerReferral = passengerReferralEnabled();
     document.querySelector("#taskCount").textContent = `共 ${records.length} 条`;
     document.querySelector("#taskPaginationCount").textContent = `共 ${records.length} 条`;
     host.innerHTML = records.length ? records.map((record, index) => {
       const canForceUpdate = record.rewardType === "cash" && ["未打款", "打款失败"].includes(record.paymentStatus);
       return `<tr>
         <td>${index + 1}</td><td class="ellipsis-cell" title="${record.shareId}">${record.shareId}</td><td>${record.guestMid}</td><td>${record.deviceNo}</td><td>${record.taskNo}</td>
-        <td>${FISSION_TYPE_LABELS[record.fissionType]}</td><td>${record.fissionType === "passenger" ? "订单任务" : TASK_LABELS[record.taskType]}</td><td>${record.fissionType === "passenger" ? "订单任务" : record.subTaskType}</td><td>${record.taskStatus}</td><td>${record.startedAt}</td><td>${record.expiresAt}</td><td>${record.completedAt}</td>
+        ${passengerReferral ? `<td>${FISSION_TYPE_LABELS[record.fissionType]}</td>` : ""}<td>${record.fissionType === "passenger" ? "订单任务" : TASK_LABELS[record.taskType]}</td><td>${record.fissionType === "passenger" ? "订单任务" : record.subTaskType}</td><td>${record.taskStatus}</td><td>${record.startedAt}</td><td>${record.expiresAt}</td><td>${record.completedAt}</td>
         <td>${rewardTypeLabel(record.rewardType)}</td><td>${record.rewardStatus}</td><td><span class="tag ${record.paymentStatus === "打款成功" ? "tag-success" : record.paymentStatus === "打款失败" ? "tag-danger" : "tag-info"}">${record.paymentStatus}</span></td><td>${record.guestRewardStatus}</td>
         <td>${canForceUpdate ? `<button class="btn btn-text" data-force-payment="${record.id}">强制更新打款状态</button>` : "-"}</td>
       </tr>`;
-    }).join("") : `<tr><td colspan="17" class="empty">暂无数据</td></tr>`;
+    }).join("") : `<tr><td colspan="${passengerReferral ? 17 : 16}" class="empty">暂无数据</td></tr>`;
     host.querySelectorAll("[data-force-payment]").forEach(button => { button.onclick = () => forceUpdatePayment(button.dataset.forcePayment); });
   }
 
@@ -401,10 +424,10 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     const shareId = document.querySelector("#detailShareId").value.trim().toLowerCase();
     const guestMid = document.querySelector("#detailGuestMid").value.trim();
     const deviceNo = document.querySelector("#detailDeviceNo").value.trim().toLowerCase();
-    const fissionType = document.querySelector("#detailFissionType").value;
+    const fissionType = document.querySelector("#detailFissionType")?.value || "";
     const rewardType = document.querySelector("#detailRewardType").value;
     const subTaskType = document.querySelector("#detailSubTaskType").value;
-    drawTaskRows(state.tasks.filter(record => (!shareId || record.shareId.toLowerCase().includes(shareId)) && (!guestMid || record.guestMid.includes(guestMid)) && (!deviceNo || record.deviceNo.toLowerCase().includes(deviceNo)) && (!fissionType || record.fissionType === fissionType) && (!rewardType || record.rewardType === rewardType) && (!subTaskType || record.subTaskType === subTaskType)));
+    drawTaskRows(state.tasks.filter(record => (passengerReferralEnabled() || record.fissionType !== "passenger") && (!shareId || record.shareId.toLowerCase().includes(shareId)) && (!guestMid || record.guestMid.includes(guestMid)) && (!deviceNo || record.deviceNo.toLowerCase().includes(deviceNo)) && (!fissionType || record.fissionType === fissionType) && (!rewardType || record.rewardType === rewardType) && (!subTaskType || record.subTaskType === subTaskType)));
   }
 
   function forceUpdatePayment(taskId) {
@@ -449,22 +472,24 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
   function renderEdit() {
     const draft = state.draft || defaultConfig();
     const ro = state.readonly ? "disabled" : "";
+    const passengerReferral = passengerReferralEnabled();
     main.innerHTML = `
       <div class="breadcrumb"><a id="fissionBack1">真车主裂变活动</a><i>›</i><a id="fissionBack2">活动配置</a><i>›</i><span>${state.readonly ? "查看" : draft.code === "保存后生成" ? "新建" : "编辑"}</span></div>
-      <div class="page-header"><div><h1>${state.readonly ? "查看真车主裂变活动" : draft.code === "保存后生成" ? "新建真车主裂变活动" : "编辑真车主裂变活动"}</h1><p>配置司机裂变、乘客裂变、主客态奖励、页面素材及分享触达</p></div><span class="tag ${draft.status ? "tag-success" : "tag-info"}">${draft.status ? "有效" : "无效"}</span></div>
+      <div class="page-header"><div><h1>${state.readonly ? "查看真车主裂变活动" : draft.code === "保存后生成" ? "新建真车主裂变活动" : "编辑真车主裂变活动"}</h1><p>${passengerReferral ? "配置司机裂变、乘客裂变、主客态奖励、页面素材及分享触达" : "配置裂变任务、主客态奖励、页面素材及分享触达"}</p></div><span class="tag ${draft.status ? "tag-success" : "tag-info"}">${draft.status ? "有效" : "无效"}</span></div>
       <form id="fissionForm">
         ${renderBasicCard(draft, ro)}
         ${renderActivityCard(draft, ro)}
-        ${renderPassengerFissionCard(draft, ro)}
+        ${passengerReferral ? renderPassengerFissionCard(draft, ro) : ""}
         ${renderMemberCard(draft, ro)}
         ${renderPageCard(draft, ro)}
         ${renderShareCard(draft, ro)}
-        ${renderPassengerShareCard(draft, ro)}
+        ${passengerReferral ? renderPassengerShareCard(draft, ro) : ""}
         ${renderPushCard(draft, ro)}
         <div class="form-footer">${state.readonly ? "" : `<button type="button" class="btn btn-primary solid" id="fissionSave">✓ 确定</button>`}<button type="button" class="btn" id="fissionClose">× 关闭</button></div>
       </form>`;
     ["fissionBack1", "fissionBack2", "fissionClose"].forEach(id => { document.querySelector(`#${id}`).onclick = () => go("list"); });
     if (!state.readonly) bindFormInteractions();
+    document.dispatchEvent(new CustomEvent("prototypecontentchange"));
   }
 
   function renderBasicCard(draft, ro) {
@@ -521,8 +546,8 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     const enabled = draft.passengerFissionEnabled === "on";
     const switchLocked = draft.code !== "保存后生成";
     const switchDisabled = state.readonly || switchLocked ? "disabled" : "";
-    return card(`乘客裂变配置 ${changeBadge()}`, `<div class="edit-grid single-column">
-      ${item(`是否开启乘客裂变 ${changeBadge("本次调整", "updated")}`, `${radios("passengerFissionEnabled", [["off", "不开启"], ["on", "开启"]], draft.passengerFissionEnabled, switchDisabled)}<div class="helper">开启后，发起人可分别生成司机邀请和乘客邀请两个分享入口；活动首次保存后不可修改</div>`, true)}
+    return card(`乘客裂变配置 ${changeBadge("edit-passenger-card")} ${changeBadge("edit-passenger-validation", "规则调整", "updated")}`, `<div class="edit-grid single-column">
+      ${item(`是否开启乘客裂变 ${changeBadge("edit-passenger-switch", "本次调整", "updated")}`, `${radios("passengerFissionEnabled", [["off", "不开启"], ["on", "开启"]], draft.passengerFissionEnabled, switchDisabled)}<div class="helper">开启后，发起人可分别生成司机邀请和乘客邀请两个分享入口；活动首次保存后不可修改</div>`, true)}
       ${enabled ? `
         ${item("乘客参与范围", radios("passengerEligibility", [["new_only", "仅新客"], ["existing_only", "仅老客"], ["all", "新老客均可"]], draft.passengerEligibility, ro), true)}
         ${item("乘客订单任务ID", `${select("passengerOrderTaskId", SELECT_OPTIONS.passengerOrder, draft.passengerOrderTaskId, ro)}${errorText("请选择乘客订单任务ID")}<div class="helper">任务有效期、订单类型和公里数等条件在任务中心配置</div>`, true, "error-passengerOrderTaskId")}
@@ -557,7 +582,8 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
   }
 
   function renderShareCard(draft, ro) {
-    return card(`司机裂变分享配置 ${changeBadge("本次调整", "updated")}`, `<div class="edit-grid single-column">
+    const title = passengerReferralEnabled() ? `司机裂变分享配置 ${changeBadge("edit-driver-share", "本次调整", "updated")}` : "分享配置";
+    return card(title, `<div class="edit-grid single-column">
       ${item("分享主标题", `${input("shareTitle", draft.shareTitle, "请输入", ro)}${errorText("请输入分享主标题")}`, true, "error-shareTitle")}
       ${item("分享副标题", `${input("shareSubtitle", draft.shareSubtitle, "请输入", ro)}${errorText("请输入分享副标题")}`, true, "error-shareSubtitle")}
       ${item("小程序分享图", `${imageUpload("shareImage", draft.shareImage, ro)}<div class="helper">图片尺寸：150 × 150；建议最大128KB</div>${errorText("请上传小程序分享图")}`, true, "error-shareImage")}
@@ -566,7 +592,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
 
   function renderPassengerShareCard(draft, ro) {
     if (draft.passengerFissionEnabled !== "on") return "";
-    return card(`乘客裂变分享配置 ${changeBadge()}`, `<div class="edit-grid single-column">
+    return card(`乘客裂变分享配置 ${changeBadge("edit-passenger-share")}`, `<div class="edit-grid single-column">
       ${item("乘客分享主标题", `${input("passengerShareTitle", draft.passengerShareTitle, "请输入乘客邀请分享主标题", ro)}${errorText("请输入乘客分享主标题")}`, true, "error-passengerShareTitle")}
       ${item("乘客分享副标题", `${input("passengerShareSubtitle", draft.passengerShareSubtitle, "请输入乘客邀请分享副标题", ro)}${errorText("请输入乘客分享副标题")}`, true, "error-passengerShareSubtitle")}
       ${item("乘客小程序分享图", `${imageUpload("passengerShareImage", draft.passengerShareImage, ro)}<div class="helper">图片尺寸：150 × 150；建议最大128KB</div>${errorText("请上传乘客小程序分享图")}`, true, "error-passengerShareImage")}
@@ -593,11 +619,13 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     bindRadio("riskControl");
     bindRadio("status", value => { state.draft.status = Number(value); });
     bindRadio("memberBenefitStart");
-    bindRadio("passengerEligibility");
-    bindRadio("passengerFissionEnabled", value => {
-      state.draft.passengerFissionEnabled = value;
-      renderEdit();
-    });
+    if (passengerReferralEnabled()) {
+      bindRadio("passengerEligibility");
+      bindRadio("passengerFissionEnabled", value => {
+        state.draft.passengerFissionEnabled = value;
+        renderEdit();
+      });
+    }
     bindRadio("taskType", value => {
       state.draft.taskType = value;
       if (value === "first_order") clearCertificationConfig();
@@ -721,7 +749,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       validatePositiveInteger(draft.orderClaimLimit, "orderClaimLimit", errors);
     }
     if (draft.memberBenefitEnabled === "on" && !draft.memberBenefitCode.trim()) errors.push("memberBenefitCode");
-    if (draft.passengerFissionEnabled === "on") {
+    if (passengerReferralEnabled() && draft.passengerFissionEnabled === "on") {
       const passengerRequired = ["passengerOrderTaskId", "passengerVoucherReward", "passengerCashReward", "passengerShareTitle", "passengerShareSubtitle", "passengerShareImage"];
       passengerRequired.forEach(key => { if (!String(draft[key] || "").trim()) errors.push(key); });
       validatePositiveInteger(draft.passengerCashAmount, "passengerCashAmount", errors);
@@ -750,8 +778,8 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     icon: "♧",
     defaultRoute: `${ACTIVITY_ID}/list`,
     menuItems: [
-      { title: "真车主裂变活动配置", route: `${ACTIVITY_ID}/list`, activeRoutes: [`${ACTIVITY_ID}/list`, `${ACTIVITY_ID}/edit`], requirementChange: "driver-passenger-referral" },
-      { title: "真车主裂变活动数据", route: `${ACTIVITY_ID}/data`, activeRoutes: [`${ACTIVITY_ID}/data`, `${ACTIVITY_ID}/data-detail`], requirementChange: "driver-passenger-referral" },
+      { title: "真车主裂变活动配置", route: `${ACTIVITY_ID}/list`, activeRoutes: [`${ACTIVITY_ID}/list`, `${ACTIVITY_ID}/edit`], requirementChanges: [PASSENGER_REFERRAL_REQUIREMENT] },
+      { title: "真车主裂变活动数据", route: `${ACTIVITY_ID}/data`, activeRoutes: [`${ACTIVITY_ID}/data`, `${ACTIVITY_ID}/data-detail`], requirementChanges: [PASSENGER_REFERRAL_REQUIREMENT] },
     ],
     routes: {
       [`${ACTIVITY_ID}/list`]: () => renderPage("list"),

@@ -32,6 +32,7 @@ const requirementView = createRequirementView({
   valueHost: document.querySelector("#requirementPickerValue"),
   menu: document.querySelector("#requirementPickerMenu"),
   panel: document.querySelector("#requirementChangePanel"),
+  onChange: () => router.navigate(router.getCurrentRoute(), { replace: true }),
 });
 
 activities.forEach(activity => {
