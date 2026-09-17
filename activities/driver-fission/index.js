@@ -61,11 +61,18 @@ const SELECT_OPTIONS = {
 const IMAGE_FIELDS = [
   ["hostHeaderImage", "主态落地页头图"],
   ["hostFlowImage", "主态落地页流程图"],
-  ["hostInviteBackgroundImage", "主态邀请页背景图"],
+  ["hostInviteBackgroundImage", "主态邀请按钮图片"],
   ["guestHeaderImage", "客态落地页头图"],
-  ["guestFlowImage", "客态落地页流程图"],
+  ["guestFlowImage", "客态落地页底图"],
   ["guestCertButtonImage", "客态可认证按钮图片"],
   ["guestOrderButtonImage", "客态可接单按钮图片"],
+];
+
+const PASSENGER_PAGE_IMAGE_FIELDS = [
+  ["passengerHostInviteButtonImage", "主态邀请乘客按钮图片"],
+  ["passengerGuestHeaderImage", "乘客客态落地页头图"],
+  ["passengerGuestBottomImage", "乘客客态落地页底图"],
+  ["passengerOrderButtonImage", "乘客客态去下单按钮图片"],
 ];
 
 function defaultConfig() {
@@ -115,6 +122,10 @@ function defaultConfig() {
     guestFlowImage: "",
     guestCertButtonImage: "",
     guestOrderButtonImage: "",
+    passengerHostInviteButtonImage: "",
+    passengerGuestHeaderImage: "",
+    passengerGuestBottomImage: "",
+    passengerOrderButtonImage: "",
     shareTitle: "",
     shareSubtitle: "",
     shareImage: "",
@@ -160,6 +171,10 @@ function seedRecord(overrides = {}) {
     guestFlowImage: "https://example.com/fission-guest-flow.png",
     guestCertButtonImage: "https://example.com/fission-cert-button.png",
     guestOrderButtonImage: "https://example.com/fission-order-button.png",
+    passengerHostInviteButtonImage: "https://example.com/fission-passenger-invite-button.png",
+    passengerGuestHeaderImage: "https://example.com/fission-passenger-guest-header.png",
+    passengerGuestBottomImage: "https://example.com/fission-passenger-guest-bottom.png",
+    passengerOrderButtonImage: "https://example.com/fission-passenger-order-button.png",
     shareTitle: "邀请你完成真车主认证",
     shareSubtitle: "完成任务即可领取奖励",
     shareImage: "https://example.com/fission-share.png",
@@ -573,11 +588,30 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
   }
 
   function renderPageCard(draft, ro) {
+    const passengerReferral = passengerReferralEnabled();
+    const passengerEnabled = passengerReferral && draft.passengerFissionEnabled === "on";
+    const imageItem = (field, label, target = "", variant = "new") => item(
+      `${label}${target ? ` ${changeBadge(target, variant === "new" ? "本次新增" : "本次调整", variant)}` : ""}`,
+      `${imageUpload(field, draft[field], ro)}<div class="helper">图片尺寸：150 × 150</div>${errorText(`请上传${label}`)}`,
+      true,
+      `error-${field}`,
+    );
     return card("页面配置", `<div class="edit-grid single-column">
       ${item("主态落地页标题", `${input("hostPageTitle", draft.hostPageTitle, "请输入", ro)}${errorText("请输入主态落地页标题")}`, true, "error-hostPageTitle")}
-      ${IMAGE_FIELDS.map(([field, label]) => item(label, `${imageUpload(field, draft[field], ro)}<div class="helper">图片尺寸：150 × 150</div>${errorText(`请上传${label}`)}`, true, `error-${field}`)).slice(0, 3).join("")}
+      ${imageItem("hostHeaderImage", "主态落地页头图")}
+      ${imageItem("hostFlowImage", "主态落地页流程图")}
+      ${imageItem("hostInviteBackgroundImage", passengerReferral ? "主态邀请司机按钮图片" : "主态邀请按钮图片", passengerReferral ? "edit-page-driver-invite-button" : "", "updated")}
+      ${passengerEnabled ? imageItem("passengerHostInviteButtonImage", "主态邀请乘客按钮图片", "edit-page-passenger-invite-button") : ""}
       ${item("活动规则", `<textarea id="activityRules" data-model="activityRules" class="multiline-input tall" placeholder="请输入活动规则" ${ro}>${draft.activityRules}</textarea>${errorText("请输入活动规则")}`, true, "error-activityRules")}
-      ${IMAGE_FIELDS.slice(3).map(([field, label]) => item(label, `${imageUpload(field, draft[field], ro)}<div class="helper">图片尺寸：150 × 150</div>${errorText(`请上传${label}`)}`, true, `error-${field}`)).join("")}
+      ${imageItem("guestHeaderImage", passengerReferral ? "司机客态落地页头图" : "客态落地页头图", passengerReferral ? "edit-page-driver-guest-header" : "", "updated")}
+      ${imageItem("guestFlowImage", passengerReferral ? "司机客态落地页底图" : "客态落地页底图", passengerReferral ? "edit-page-driver-guest-bottom" : "", "updated")}
+      ${imageItem("guestCertButtonImage", passengerReferral ? "司机客态可认证按钮图片" : "客态可认证按钮图片", passengerReferral ? "edit-page-driver-cert-button" : "", "updated")}
+      ${imageItem("guestOrderButtonImage", passengerReferral ? "司机客态可接单按钮图片" : "客态可接单按钮图片", passengerReferral ? "edit-page-driver-order-button" : "", "updated")}
+      ${passengerEnabled ? `
+        ${imageItem("passengerGuestHeaderImage", "乘客客态落地页头图", "edit-page-passenger-guest-header")}
+        ${imageItem("passengerGuestBottomImage", "乘客客态落地页底图", "edit-page-passenger-guest-bottom")}
+        ${imageItem("passengerOrderButtonImage", "乘客客态去下单按钮图片", "edit-page-passenger-order-button")}
+      ` : ""}
     </div>`);
   }
 
@@ -750,7 +784,15 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     }
     if (draft.memberBenefitEnabled === "on" && !draft.memberBenefitCode.trim()) errors.push("memberBenefitCode");
     if (passengerReferralEnabled() && draft.passengerFissionEnabled === "on") {
-      const passengerRequired = ["passengerOrderTaskId", "passengerVoucherReward", "passengerCashReward", "passengerShareTitle", "passengerShareSubtitle", "passengerShareImage"];
+      const passengerRequired = [
+        "passengerOrderTaskId",
+        "passengerVoucherReward",
+        "passengerCashReward",
+        "passengerShareTitle",
+        "passengerShareSubtitle",
+        "passengerShareImage",
+        ...PASSENGER_PAGE_IMAGE_FIELDS.map(([key]) => key),
+      ];
       passengerRequired.forEach(key => { if (!String(draft[key] || "").trim()) errors.push(key); });
       validatePositiveInteger(draft.passengerCashAmount, "passengerCashAmount", errors);
       validateNonNegativeInteger(draft.passengerClaimDelay, "passengerClaimDelay", errors);
