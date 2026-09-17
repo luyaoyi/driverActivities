@@ -519,8 +519,10 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
 
   function renderPassengerFissionCard(draft, ro) {
     const enabled = draft.passengerFissionEnabled === "on";
+    const switchLocked = draft.code !== "保存后生成";
+    const switchDisabled = state.readonly || switchLocked ? "disabled" : "";
     return card(`乘客裂变配置 ${changeBadge()}`, `<div class="edit-grid single-column">
-      ${item("是否开启乘客裂变", `${radios("passengerFissionEnabled", [["off", "不开启"], ["on", "开启"]], draft.passengerFissionEnabled, ro)}<div class="helper">开启后，发起人可分别生成司机邀请和乘客邀请两个分享入口</div>`, true)}
+      ${item(`是否开启乘客裂变 ${changeBadge("本次调整", "updated")}`, `${radios("passengerFissionEnabled", [["off", "不开启"], ["on", "开启"]], draft.passengerFissionEnabled, switchDisabled)}<div class="helper">开启后，发起人可分别生成司机邀请和乘客邀请两个分享入口；活动首次保存后不可修改</div>`, true)}
       ${enabled ? `
         ${item("乘客参与范围", radios("passengerEligibility", [["new_only", "仅新客"], ["existing_only", "仅老客"], ["all", "新老客均可"]], draft.passengerEligibility, ro), true)}
         ${item("乘客订单任务ID", `${select("passengerOrderTaskId", SELECT_OPTIONS.passengerOrder, draft.passengerOrderTaskId, ro)}${errorText("请选择乘客订单任务ID")}<div class="helper">任务有效期、订单类型和公里数等条件在任务中心配置</div>`, true, "error-passengerOrderTaskId")}
@@ -686,6 +688,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       const index = repository.list().length + 1;
       repository.create({ ...common, code: `FISSION-202609-${String(index).padStart(3, "0")}`, creator: "当前用户", created: nowText() });
     } else {
+      common.passengerFissionEnabled = repository.find(state.draft.code)?.passengerFissionEnabled || "off";
       repository.update(state.draft.code, common);
     }
     toast("保存成功");
