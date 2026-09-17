@@ -1,5 +1,6 @@
 import { createRouter } from "./core/router.js";
 import { createShell } from "./core/shell.js";
+import { createRequirementView } from "./core/requirement-view.js";
 import { createDriverFissionActivity } from "./activities/driver-fission/index.js";
 import { createTeamOrderActivity } from "./activities/team-order/index.js";
 
@@ -26,11 +27,21 @@ const shell = createShell({
   navigate: route => router.navigate(route),
 });
 
+const requirementView = createRequirementView({
+  button: document.querySelector("#requirementPickerButton"),
+  valueHost: document.querySelector("#requirementPickerValue"),
+  menu: document.querySelector("#requirementPickerMenu"),
+  panel: document.querySelector("#requirementChangePanel"),
+});
+
 activities.forEach(activity => {
   Object.entries(activity.routes).forEach(([route, render]) => {
     router.register(route, render);
   });
 });
 
-router.onChange(route => shell.setActiveRoute(route));
+router.onChange(route => {
+  shell.setActiveRoute(route);
+  requirementView.setRoute(route);
+});
 router.start(activities[0].defaultRoute);

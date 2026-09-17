@@ -10,15 +10,27 @@
   <div class="app-shell">
     <header class="topbar">
       <div class="brand"><span class="brand-mark">M</span><span>营销活动管理平台</span></div>
-      <div class="top-actions"><span class="environment">测试环境</span><span class="user-dot">运</span><span>运营管理员</span><span class="chevron">⌄</span></div>
+      <div class="top-actions">
+        <div class="requirement-picker">
+          <button type="button" class="requirement-picker-button" id="requirementPickerButton" aria-expanded="false">
+            <span>需求选择</span><strong id="requirementPickerValue">未选择</strong><span class="requirement-picker-arrow">⌄</span>
+          </button>
+          <div class="requirement-picker-menu" id="requirementPickerMenu" hidden>
+            <button type="button" data-requirement-option="">不展示需求改动</button>
+            <button type="button" data-requirement-option="driver-passenger-referral">司乘互推</button>
+          </div>
+        </div>
+        <span class="environment">测试环境</span><span class="user-dot">运</span><span>运营管理员</span><span class="chevron">⌄</span>
+      </div>
     </header>
     <div class="workspace">
       <aside id="sidebar" class="sidebar"></aside>
       <main id="main" class="main"></main>
+      <aside id="requirementChangePanel" class="requirement-change-panel" aria-live="polite"></aside>
     </div>
   </div>
   <div id="toast" class="toast"></div>
   <div id="modalRoot"></div>
-  <script type="module" src="app.js"></script>
+  <script type="module" src="app.js?v=202609171240"></script>
 </body>
 </html>

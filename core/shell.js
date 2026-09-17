@@ -12,7 +12,10 @@ export function createShell({ host, activities, navigate }) {
         </button>
         <div class="subnav" data-activity-pages="${activity.id}">
           ${activity.menuItems.map(item => `
-            <a class="subnav-item" href="#/${item.route}" data-route="${item.route}">${item.title}</a>
+            <a class="subnav-item" href="#/${item.route}" data-route="${item.route}">
+              <span>${item.title}</span>
+              ${item.requirementChange ? `<span class="nav-change-badge" data-requirement-marker="${item.requirementChange}">改</span>` : ""}
+            </a>
           `).join("")}
         </div>
       </div>

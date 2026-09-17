@@ -747,8 +747,8 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
     icon: "♧",
     defaultRoute: `${ACTIVITY_ID}/list`,
     menuItems: [
-      { title: "真车主裂变活动配置", route: `${ACTIVITY_ID}/list`, activeRoutes: [`${ACTIVITY_ID}/list`, `${ACTIVITY_ID}/edit`] },
-      { title: "真车主裂变活动数据", route: `${ACTIVITY_ID}/data`, activeRoutes: [`${ACTIVITY_ID}/data`, `${ACTIVITY_ID}/data-detail`] },
+      { title: "真车主裂变活动配置", route: `${ACTIVITY_ID}/list`, activeRoutes: [`${ACTIVITY_ID}/list`, `${ACTIVITY_ID}/edit`], requirementChange: "driver-passenger-referral" },
+      { title: "真车主裂变活动数据", route: `${ACTIVITY_ID}/data`, activeRoutes: [`${ACTIVITY_ID}/data`, `${ACTIVITY_ID}/data-detail`], requirementChange: "driver-passenger-referral" },
     ],
     routes: {
       [`${ACTIVITY_ID}/list`]: () => renderPage("list"),
