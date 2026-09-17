@@ -12,14 +12,17 @@ export function createShell({ host, activities, navigate }) {
         </button>
         <div class="subnav" data-activity-pages="${activity.id}">
           ${activity.menuItems.map(item => `
-            <button class="subnav-item" data-route="${item.route}">${item.title}</button>
+            <a class="subnav-item" href="#/${item.route}" data-route="${item.route}">${item.title}</a>
           `).join("")}
         </div>
       </div>
     `).join("")}`;
 
   host.querySelectorAll("[data-route]").forEach(button => {
-    button.addEventListener("click", () => navigate(button.dataset.route));
+    button.addEventListener("click", event => {
+      event.preventDefault();
+      navigate(button.dataset.route);
+    });
   });
 
   host.querySelectorAll("[data-toggle-activity]").forEach(button => {
