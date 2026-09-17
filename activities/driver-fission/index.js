@@ -12,6 +12,10 @@ const TASK_LABELS = {
 const FISSION_TYPE_LABELS = { driver: "司机裂变", passenger: "乘客裂变" };
 const PASSENGER_REWARD_TYPE_LABELS = { cash: "现金奖励" };
 
+function changeBadge(text = "本次新增", variant = "new") {
+  return `<span class="change-badge change-badge-${variant}">${text}</span>`;
+}
+
 const SELECT_OPTIONS = {
   certification: [
     ["CERT-REAL-OWNER-001", "真车主认证任务"],
@@ -233,7 +237,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       </section>
       <section>
         <div class="table-titlebar"><span class="table-title">真车主裂变活动配置</span><span id="fissionCount" style="color:#909399;font-size:12px">共 ${records.length} 条</span></div>
-        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>活动名称</th><th>司机任务类型</th><th>乘客裂变</th><th>状态</th><th>创建人</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="fissionRows"></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>活动名称</th><th>司机任务类型 ${changeBadge("本次调整", "updated")}</th><th>乘客裂变 ${changeBadge()}</th><th>状态</th><th>创建人</th><th>创建时间</th><th>操作</th></tr></thead><tbody id="fissionRows"></tbody></table></div>
         <div class="pagination"><span>共 ${records.length} 条</span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
       </section>`;
     drawRows(records);
@@ -280,7 +284,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
       </section>
       <section>
         <div class="table-titlebar"><span class="table-title">裂变活动参与数据</span><span id="participationCount" style="color:#909399;font-size:12px"></span></div>
-        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>主态mid</th><th>分享ID</th><th>任务类型</th><th>活动参与时间</th><th>司机裂变可领奖总次数</th><th>司机已领奖总次数</th><th>乘客裂变可领奖总次数</th><th>乘客裂变已领奖总次数</th><th>操作</th></tr></thead><tbody id="participationRows"></tbody></table></div>
+        <div class="table-wrap"><table><thead><tr><th>序号</th><th>活动编号</th><th>主态mid</th><th>分享ID</th><th>任务类型</th><th>活动参与时间</th><th>司机裂变可领奖总次数 ${changeBadge("本次调整", "updated")}</th><th>司机已领奖总次数 ${changeBadge("本次调整", "updated")}</th><th>乘客裂变可领奖总次数 ${changeBadge()}</th><th>乘客裂变已领奖总次数 ${changeBadge()}</th><th>操作</th></tr></thead><tbody id="participationRows"></tbody></table></div>
         <div class="pagination"><span id="participationPaginationCount"></span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
       </section>`;
     drawParticipationRows(state.participations);
@@ -348,15 +352,15 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
           <div class="form-field"><label>分享Id：</label><input id="detailShareId" value="${state.selectedShareId}" placeholder="请输入"></div>
           <div class="form-field"><label>客态mid：</label><input id="detailGuestMid" placeholder="请输入"></div>
           <div class="form-field"><label>设备号：</label><input id="detailDeviceNo" placeholder="请输入"></div>
-          <div class="form-field"><label>裂变类型：</label><select id="detailFissionType"><option value="">全部</option><option value="driver">司机裂变</option><option value="passenger">乘客裂变</option></select></div>
+          <div class="form-field"><label>裂变类型 ${changeBadge()}：</label><select id="detailFissionType"><option value="">全部</option><option value="driver">司机裂变</option><option value="passenger">乘客裂变</option></select></div>
           <div class="form-field"><label>主态奖励类型：</label><select id="detailRewardType"><option value="">全部</option><option value="ordinary">普通奖励</option><option value="cash">现金奖励</option></select></div>
-          <div class="form-field"><label>子任务类型：</label><select id="detailSubTaskType"><option value="">全部</option><option value="认证任务">认证任务</option><option value="首单任务">首单任务</option><option value="首单完单">首单完单</option><option value="订单任务">订单任务</option></select></div>
+          <div class="form-field"><label>子任务类型 ${changeBadge("本次调整", "updated")}：</label><select id="detailSubTaskType"><option value="">全部</option><option value="认证任务">认证任务</option><option value="首单任务">首单任务</option><option value="首单完单">首单完单</option><option value="订单任务">订单任务</option></select></div>
         </div>
         <div class="query-actions"><button class="btn btn-primary" id="detailQuery">⌕ 查询</button><button class="btn btn-primary" id="detailReset">↻ 重置</button></div>
       </section>
       <section>
         <div class="table-titlebar"><span class="table-title">客态任务明细</span><span id="taskCount" style="color:#909399;font-size:12px"></span></div>
-        <div class="table-wrap"><table class="extra-wide"><thead><tr><th>序号</th><th>分享ID</th><th>客态mid</th><th>设备号</th><th>taskNo</th><th>裂变类型</th><th>任务类型</th><th>子任务类型</th><th>任务状态</th><th>任务开始时间</th><th>任务过期时间</th><th>任务完成时间</th><th>主态奖励类型</th><th>主态奖励状态</th><th>打款状态</th><th>客态奖励状态</th><th>操作</th></tr></thead><tbody id="taskRows"></tbody></table></div>
+        <div class="table-wrap"><table class="extra-wide"><thead><tr><th>序号</th><th>分享ID</th><th>客态mid</th><th>设备号</th><th>taskNo</th><th>裂变类型 ${changeBadge()}</th><th>任务类型 ${changeBadge("本次调整", "updated")}</th><th>子任务类型 ${changeBadge("本次调整", "updated")}</th><th>任务状态</th><th>任务开始时间</th><th>任务过期时间</th><th>任务完成时间</th><th>主态奖励类型</th><th>主态奖励状态</th><th>打款状态</th><th>客态奖励状态</th><th>操作</th></tr></thead><tbody id="taskRows"></tbody></table></div>
         <div class="pagination"><span id="taskPaginationCount"></span><select style="width:90px"><option>10条/页</option><option>20条/页</option><option>50条/页</option></select><span class="page-box">‹</span><span class="page-box active">1</span><span class="page-box">›</span><span>前往</span><input style="width:46px;height:28px" value="1"><span>页</span></div>
       </section>`;
     ["backToFissionData", "backToFissionData2"].forEach(id => { document.querySelector(`#${id}`).onclick = () => go("data"); });
@@ -515,7 +519,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
 
   function renderPassengerFissionCard(draft, ro) {
     const enabled = draft.passengerFissionEnabled === "on";
-    return card("乘客裂变配置", `<div class="edit-grid single-column">
+    return card(`乘客裂变配置 ${changeBadge()}`, `<div class="edit-grid single-column">
       ${item("是否开启乘客裂变", `${radios("passengerFissionEnabled", [["off", "不开启"], ["on", "开启"]], draft.passengerFissionEnabled, ro)}<div class="helper">开启后，发起人可分别生成司机邀请和乘客邀请两个分享入口</div>`, true)}
       ${enabled ? `
         ${item("乘客参与范围", radios("passengerEligibility", [["new_only", "仅新客"], ["existing_only", "仅老客"], ["all", "新老客均可"]], draft.passengerEligibility, ro), true)}
@@ -551,7 +555,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
   }
 
   function renderShareCard(draft, ro) {
-    return card("司机裂变分享配置", `<div class="edit-grid single-column">
+    return card(`司机裂变分享配置 ${changeBadge("本次调整", "updated")}`, `<div class="edit-grid single-column">
       ${item("分享主标题", `${input("shareTitle", draft.shareTitle, "请输入", ro)}${errorText("请输入分享主标题")}`, true, "error-shareTitle")}
       ${item("分享副标题", `${input("shareSubtitle", draft.shareSubtitle, "请输入", ro)}${errorText("请输入分享副标题")}`, true, "error-shareSubtitle")}
       ${item("小程序分享图", `${imageUpload("shareImage", draft.shareImage, ro)}<div class="helper">图片尺寸：150 × 150；建议最大128KB</div>${errorText("请上传小程序分享图")}`, true, "error-shareImage")}
@@ -560,7 +564,7 @@ export function createDriverFissionActivity({ main, modalRoot, navigate }) {
 
   function renderPassengerShareCard(draft, ro) {
     if (draft.passengerFissionEnabled !== "on") return "";
-    return card("乘客裂变分享配置", `<div class="edit-grid single-column">
+    return card(`乘客裂变分享配置 ${changeBadge()}`, `<div class="edit-grid single-column">
       ${item("乘客分享主标题", `${input("passengerShareTitle", draft.passengerShareTitle, "请输入乘客邀请分享主标题", ro)}${errorText("请输入乘客分享主标题")}`, true, "error-passengerShareTitle")}
       ${item("乘客分享副标题", `${input("passengerShareSubtitle", draft.passengerShareSubtitle, "请输入乘客邀请分享副标题", ro)}${errorText("请输入乘客分享副标题")}`, true, "error-passengerShareSubtitle")}
       ${item("乘客小程序分享图", `${imageUpload("passengerShareImage", draft.passengerShareImage, ro)}<div class="helper">图片尺寸：150 × 150；建议最大128KB</div>${errorText("请上传乘客小程序分享图")}`, true, "error-passengerShareImage")}

@@ -77,6 +77,9 @@ tbody tr:hover { background: #f5faff; }
 .tag { display: inline-flex; align-items: center; justify-content: center; min-width: 48px; height: 24px; padding: 0 8px; font-size: 12px; border-radius: 3px; border: 1px solid; }
 .tag-success { color: var(--success); background: #f0f9eb; border-color: #c2e7b0; }
 .tag-info { color: var(--muted); background: #f4f4f5; border-color: #d3d4d6; }
+.change-badge { display: inline-flex; align-items: center; height: 18px; padding: 0 5px; margin-left: 4px; border: 1px solid; border-radius: 3px; font-size: 11px; line-height: 16px; font-weight: 400; white-space: nowrap; vertical-align: middle; }
+.change-badge-new { color: #e66a00; background: #fff7e8; border-color: #ffc069; }
+.change-badge-updated { color: #1677ff; background: #eaf4ff; border-color: #91caff; }
 .tag-warning { color: var(--warning); background: #fdf6ec; border-color: #f5dab1; }
 .tag-danger { color: var(--danger); background: #fef0f0; border-color: #fbc4c4; }
 .pagination { display: flex; align-items: center; justify-content: flex-end; gap: 8px; color: var(--regular); background: #fff; padding: 16px 4px; }
